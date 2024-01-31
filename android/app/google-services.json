@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1065398847844",
+    "project_id": "taba-94ec5",
+    "storage_bucket": "taba-94ec5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1065398847844:android:b86b19e63ccbecc6635271",
+        "android_client_info": {
+          "package_name": "com.example.taba_app_android"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWNF7wCEJS2GZMWv6lbbKONZu_YY3QRCI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
