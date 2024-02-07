@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:taba_app_android/view/passwordreset.dart';
 import 'package:taba_app_android/view/register.dart';
 import '../controller/controllers.dart';
 import '../services/login_api.dart';
@@ -168,20 +169,9 @@ class _LoginState extends State<Login> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        GestureDetector(
-                          onTap: () {
-                            // Handle forgot password hint tap
-                          },
-                          child: Text.rich(
-                            TextSpan(
-                              text: "ForgotPassword",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                        ),
+                          TextButton(onPressed: (){
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => PasswordResetPage(),));
+                          }, child: Text("ForgotPassword",style: TextStyle(color: Colors.white,fontSize: 10),)),
                         Text(
                           'Don’t have an account ? ',
                           style: TextStyle(
@@ -189,8 +179,8 @@ class _LoginState extends State<Login> {
                             fontSize: 10,
                           ),
                         ),
-                        GestureDetector(
-                          onTap: () {
+                        TextButton(
+                          onPressed: () {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
@@ -198,15 +188,7 @@ class _LoginState extends State<Login> {
                               ),
                             );
                           },
-                          child: Text.rich(
-                            TextSpan(
-                              text: "SignUp",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
+                          child: Text("SignUp",style: TextStyle(color: Colors.white,fontSize: 10)),
                         ),
                       ],
                     ),

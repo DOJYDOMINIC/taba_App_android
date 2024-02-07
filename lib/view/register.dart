@@ -174,15 +174,16 @@ User? userData;
                               dateFormat: "dd-MM-yyyy",
                               locale: DateTimePickerLocale.en_us,
                               looping: true,
+                                  // pickerMode: DateTimePickerMode.date
                             );
                             if (datePicked != null) {
+                              _enroll.currentState!.validate();
                               enrolldate = DateFormat('dd-MM-yyyy').format(datePicked);
                               enrolldatecontroller.text = enrolldate;
                               userData?.enrollmentDate = enrolldate;
 
                             }
                             setState(() {
-
                             });
                           },
                           icon: Icon(
@@ -267,8 +268,7 @@ User? userData;
                               MaterialStateProperty.all(Colors.white),
                         ),
                         onPressed: () async {
-                          final SharedPreferences prefs =
-                              await SharedPreferences.getInstance();
+                          final SharedPreferences prefs = await SharedPreferences.getInstance();
                           var regNo = prefs.getString("regNo");
                           prefs.clear();
                           if (regNo == null) {
@@ -280,7 +280,7 @@ User? userData;
                          "enrollmentDate": enrolldatecontroller.text,
                        };
 
-                          print(collectedData["regNo"]);
+                          // print(collectedData["regNo"]);
 
 
                           Navigator.push(

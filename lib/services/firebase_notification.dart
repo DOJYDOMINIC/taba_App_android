@@ -73,7 +73,7 @@ Future<void> initNotification(
   await localNotifications.initialize(initializationSettings,
       onDidReceiveNotificationResponse:
           (NotificationResponse notificationResponse) async {
-    print("aaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    print("Notification Response");
     print("$notificationResponse");
     print("${notificationResponse.payload}");
     // handleMessage(message);
@@ -111,7 +111,7 @@ Future initPushNotifications() async {
     final notification = message.notification;
     if (notification == null) return;
     showLocalNotification(message.notification!, message.data);
-    // handleMessage(message);
+    handleMessage(message);
     print("Title : ${message.notification?.title}");
     print("Body: ${message.notification?.body}");
     print("Payload: ${message.data}");

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../controller/controllers.dart';
 
 class PaymentPage extends StatefulWidget {
   const PaymentPage({super.key});
@@ -8,12 +11,18 @@ class PaymentPage extends StatefulWidget {
 }
 
 class _PaymentPageState extends State<PaymentPage> {
-   final double amountPaid= 100;
+
+
+
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context,) {
+    var pro = context.read<ControllerData>();
+    final String amountPaid= pro.amount;
+
     var width = MediaQuery.of(context).size.width;
     return Scaffold(
+      backgroundColor: Colors.black,
       // appBar: AppBar(
       //   title: Text('Payment Confirmation'),
       // ),
@@ -32,19 +41,20 @@ class _PaymentPageState extends State<PaymentPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    if(amountPaid==100)
+                    if(amountPaid=="0")
                     Icon(
                       Icons.check_circle,
                       color: Colors.green,
                       size: 80.0,
                     ),
-                    if(amountPaid<=100)
+                    if(amountPaid!= "0")
                       Icon(
                         Icons.info_outline,
                         color: Colors.amber,
                         size: 80.0,
                       ),
                     SizedBox(height: 16.0),
+                    if(amountPaid=="0")
                     Text(
                       'Paid!',
                       style: TextStyle(
@@ -52,16 +62,26 @@ class _PaymentPageState extends State<PaymentPage> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+                    if(amountPaid!="0")
+                      Text(
+                        'Due!',
+                        style: TextStyle(
+                          fontSize: 24.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     SizedBox(height: 16.0),
+                    if(amountPaid!="0")
                     Text(
-                      'Amount Paid',
+                      'Amount to Pay',
                       style: TextStyle(
                         fontSize: 18.0,
                         color: Colors.grey,
                       ),
                     ),
+                    if(amountPaid!="0")
                     Text(
-                      '\$$amountPaid',
+                      '₹$amountPaid',
                       style: TextStyle(
                         fontSize: 28.0,
                         fontWeight: FontWeight.bold,

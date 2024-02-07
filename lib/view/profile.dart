@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter_holo_date_picker/date_picker.dart';
 import 'package:flutter_holo_date_picker/i18n/date_picker_i18n.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -12,17 +11,21 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taba_app_android/constants/constants.dart';
 import 'package:taba_app_android/model/user_model.dart';
 import 'package:taba_app_android/view/login.dart';
-import '../main.dart';
+import '../controller/controllers.dart';
 import '../widgets/text_field.dart';
 import 'bottom_nav_bar.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key, this.item});
-  final  item;
+
+  final item;
+
   @override
   State<ProfilePage> createState() => _ProfilePageState();
 }
@@ -34,56 +37,93 @@ class _ProfilePageState extends State<ProfilePage> {
     fetchData();
     whatsappNumber();
     welfare();
+
     // dataMaster();
   }
 
   User? userData;
   var result;
+  var regNo = "";
 
   fetchData() async {
     try {
       result = box.get(0);
-      // print(result.toString());
-      userData = User.fromJson(result);
+
+      if(result != null){
+        userData = User.fromJson(result);
+      }
     } catch (error) {
       debugPrint("Hive: $error");
     }
   }
 
+  Future<void> profileData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var userdat = prefs.getString("regNo");
+    try {
+      final response = await http.post(
+        Uri.parse("$baseUrl/get_by_regno"),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(
+          {
+            "regNo": userdat,
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        var user = jsonDecode(response.body);
+        box.put(0, user[0]);
+        Map<String, dynamic> profileData = box.get(0);
+       userData = User.fromJson(profileData);
+        setState(() {});
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
   String? welfareData;
+  late var bloodGroup = userData?.bloodGroup ?? "BloodGroup";
+
 
   addData() async {
-    File? preset = File("assets/images/person.jpg");
-    if (result !=null) {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var id = prefs.getString("id");
+    if (userData != null) {
       User newUser = User(
-        regNo: userData?.regNo,
-        phone: userData?.phone ?? "",
-        firstName: userData?.firstName ?? "",
-        lastName: userData?.lastName ?? "",
-        email: userData?.email ?? "",
-        dob: userData?.dob ?? "",
-        address: userData?.address ?? "",
-        officeAddress: userData?.officeAddress ?? "",
-        clerkName1:
-        userData?.clerkName1 ?? "",
-        clerkName2:
-        userData?.clerkName2 ?? "",
-        clerkPhone1:
-        userData?.clerkPhone1 ?? "",
-        clerkPhone2: userData?.clerkPhone2 ?? "",
-        bloodGroup: userData?.bloodGroup ?? "",
-        welfareMember: userData?.welfareMember ?? "",
-        enrollmentDate: userData?.enrollmentDate ?? "",
-        pincode: userData?.pincode ?? "",
-        district: userData?.district ?? "",
-        state: userData?.state ?? "",
-        whatsAppno: userData?.whatsAppno ?? "",
-      );
+          id: id,
+          regNo: userData?.regNo,
+          phone: userData?.phone ?? "",
+          firstName: userData?.firstName ?? "",
+          lastName: userData?.lastName ?? "",
+          email: userData?.email ?? "",
+          dob: userData?.dob ?? "",
+          address: userData?.address ?? "",
+          officeAddress: userData?.officeAddress ?? "",
+          clerkName1: userData?.clerkName1 ?? "",
+          clerkName2: userData?.clerkName2 ?? "",
+          clerkPhone1: userData?.clerkPhone1 ?? "",
+          clerkPhone2: userData?.clerkPhone2 ?? "",
+          bloodGroup: userData?.bloodGroup ?? "",
+          welfareMember: userData?.welfareMember ?? "",
+          enrollmentDate: userData?.enrollmentDate ?? "",
+          pincode: userData?.pincode ?? "",
+          district: userData?.district ?? "",
+          state: userData?.state ?? "",
+          whatsAppno: userData?.whatsAppno ?? "",
+          password: userData?.password,
+          isRegisteredUser: true,
+          isValidUser: true);
+
       sendUserDataRequest(newUser);
-    }else{
+
+    } else if (result == null) {
       User newUser = User(
         regNo: widget.item["regNo"],
-        phone: _phone.text ,
+        phone: _phone.text,
         firstName: _firstname.text,
         lastName: _lastname.text,
         password: widget.item["password"],
@@ -91,12 +131,12 @@ class _ProfilePageState extends State<ProfilePage> {
         dob: _dob.text,
         address: _address.text,
         officeAddress: _officeaddress.text,
-        clerkName1:_clerkname1.text,
-        clerkName2:_clerkname2.text,
-        clerkPhone1:_clerkphone1.text,
-        clerkPhone2:_clerkphone2.text,
+        clerkName1: _clerkname1.text,
+        clerkName2: _clerkname2.text,
+        clerkPhone1: _clerkphone1.text,
+        clerkPhone2: _clerkphone2.text,
         bloodGroup: selectedValue,
-        welfareMember: "",
+        welfareMember: welfareData,
         enrollmentDate: widget.item["enrollmentDate"],
         pincode: _pincode.text,
         district: _district.text,
@@ -105,33 +145,42 @@ class _ProfilePageState extends State<ProfilePage> {
       );
       print('regNo: ${widget.item["regNo"]}');
       print('phone: ${_phone.text}');
-      print('firstName: ${_firstname.text}');
-      print('lastName: ${_lastname.text}');
-      print('email: ${_email.text}');
-      print('dob: ${_dob.text}');
-      print('address: ${_address.text}');
-      print('officeAddress: ${_officeaddress.text}');
-      print('clerkName1: ${_clerkname1.text}');
-      print('clerkName2: ${_clerkname2.text}');
-      print('clerkPhone1: ${_clerkphone1.text}');
-      print('clerkPhone2: ${_clerkphone2.text}');
-      print('bloodGroup: $selectedValue');
-      print('welfareMember: $welfareData');
-      print('enrollmentDate: $_enroll');
-      print('pincode: ${_pincode.text}');
-      print('district: ${_district.text}');
-      print('state: ${_state.text}');
-      print('whatsAppno: ${_whatsapp.text}');
       uploadData(newUser);
     }
   }
 
+  File base64ToFile(String base64String, String fileName) {
+    // Decode the base64 string
+    List<int> bytes = base64.decode(base64String);
+
+    // Create a temporary file
+    File file = File(fileName);
+
+    // Write the bytes to the file
+    file.writeAsBytesSync(bytes);
+
+    return file;
+  }
 
   Future<void> uploadData(User userData) async {
-    var request = http.MultipartRequest(
-        'POST', Uri.parse('$baseUrl/upload'));
+    var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/upload'));
+
     if (_image == null || _image!.path.isEmpty) {
-      _image = await createTemporaryFileFromAsset("assets/images/man.png");
+      Future<File> base64ToImage(String base64String) async {
+        Directory documentsDirectory = await getApplicationDocumentsDirectory();
+        String outputPath = '${documentsDirectory.path}/decoded_image.jpg';
+
+        List<int> imageBytes = base64Decode(base64String);
+        File imageFile = File(outputPath);
+        await imageFile.writeAsBytes(imageBytes);
+        return imageFile;
+      }
+
+      String base64String = defaultImage; // Your base64 string
+      File decodedImage = await base64ToImage(base64String);
+      print(decodedImage.path);
+      _image = decodedImage;
+      print(_image?.path);
     }
 
     // Convert User object to a map
@@ -144,13 +193,9 @@ class _ProfilePageState extends State<ProfilePage> {
     // Add the image file as a MultipartFile
     File compressedImage = await _compressImage(_image!);
     var imageFile = await http.MultipartFile.fromPath(
-        'image',
-        compressedImage.path,
-        contentType: MediaType('image', 'jpeg'),
-        filename: "1234.jpeg"
-    );
+        'image', compressedImage.path,
+        contentType: MediaType('image', 'jpeg'), filename: "1234.jpeg");
     request.files.add(imageFile);
-
     // Send the request
     try {
       var response = await request.send();
@@ -164,16 +209,35 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-
   Future<void> sendUserDataRequest(User userData) async {
-    var request = http.MultipartRequest(
-        'PUT', Uri.parse('$baseUrl/update/65ba14bc16c1d312c96ae0f5'));
+    print("${result["password"]}");
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    var id = prefs.getString("id");
+
+    var request = http.MultipartRequest('PUT', Uri.parse('$baseUrl/update/$id'));
+
+    // If _image is null or its path is empty, use a default image
+
     if (_image == null || _image!.path.isEmpty) {
-      _image = await createTemporaryFileFromAsset("assets/images/man.png");
+      Future<File> base64ToImage(String base64String) async {
+        Directory documentsDirectory = await getApplicationDocumentsDirectory();
+        String outputPath = '${documentsDirectory.path}/decoded_image.jpg';
+
+        List<int> imageBytes = base64Decode(base64String);
+        File imageFile = File(outputPath);
+        await imageFile.writeAsBytes(imageBytes);
+        return imageFile;
+      }
+
+      String base64String = result["image"]; // Your base64 string
+      File decodedImage = await base64ToImage(base64String);
+      _image = decodedImage;
     }
 
     // Convert User object to a map
     Map<String, dynamic> userMap = userData.toJson();
+
     // Iterate through the map and set fields in the request
     userMap.forEach((key, value) {
       request.fields[key] = value.toString();
@@ -182,12 +246,27 @@ class _ProfilePageState extends State<ProfilePage> {
     // Add the image file as a MultipartFile
     File compressedImage = await _compressImage(_image!);
     var imageFile = await http.MultipartFile.fromPath(
-        'image',
-        compressedImage.path,
-        contentType: MediaType('image', 'jpeg'),
-        filename: "1234.jpeg"
+      'image',
+      compressedImage.path,
+      contentType: MediaType('image', 'jpeg'),
+      filename: "1234.jpeg",
     );
     request.files.add(imageFile);
+
+    // Print out the data being sent to the API
+    print('PUT Request Data:');
+    print('URL: ${request.url}');
+    print('Fields:');
+    request.fields.forEach((key, value) {
+      print('$key: $value');
+    });
+    print('Files:');
+    request.files.forEach((file) {
+      print('Field name: ${file.field}');
+      print('File name: ${file.filename}');
+      print('Content type: ${file.contentType}');
+      print('File length: ${file.length}');
+    });
 
     // Send the request
     try {
@@ -206,10 +285,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final ByteData data = await rootBundle.load(assetPath);
     final List<int> bytes = data.buffer.asUint8List();
     final String tempFileName =
-    DateTime
-        .now()
-        .millisecondsSinceEpoch
-        .toString();
+        DateTime.now().millisecondsSinceEpoch.toString();
     final File tempFile = File('${Directory.systemTemp.path}/$tempFileName');
     await tempFile.writeAsBytes(bytes, flush: true);
     return tempFile;
@@ -223,17 +299,16 @@ class _ProfilePageState extends State<ProfilePage> {
       imageBytes,
       minHeight: 800, // Adjust the height and width based on your requirements
       minWidth: 800,
-      quality: 80, // Adjust the quality as needed
+      quality: 50, // Adjust the quality as needed
       format: CompressFormat.jpeg,
     );
 
     // Create a temporary file and write the compressed bytes to it
     File compressedFile =
-    File('${Directory.systemTemp.path}/compressed_image.jpg');
+        File('${Directory.systemTemp.path}/compressed_image.jpg');
     compressedFile.writeAsBytesSync(compressedBytes);
     return compressedFile;
   }
-
 
   final ImagePicker _picker = ImagePicker();
 
@@ -270,13 +345,12 @@ class _ProfilePageState extends State<ProfilePage> {
 
   bool isDateValid(String date) {
     try {
-      DateTime parsedDate = DateFormat('dd/MM/yyyy').parseStrict(date);
+      DateTime parsedDate = DateFormat('dd-MM-yyyy').parseStrict(date);
       return parsedDate != null;
     } catch (e) {
       return false;
     }
   }
-
 
   Future<void> _showImageSourceBottomSheet() async {
     await showModalBottomSheet(
@@ -307,80 +381,9 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Future<void> sendMultipartRequest() async {
-  //   // Compress the image before sending
-  //   File compressedImage = await _compressImage(_image!);
-  //
-  //   var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/'));
-  //   // Add other fields if needed
-  //
-  //   request.fields['regNo'] = '1234';
-  //   request.fields['phone'] = '9072176204';
-  //   request.fields['password'] = '12345';
-  //
-  //   // Add the compressed image as a MultipartFile
-  //   var compressedImageFile = await http.MultipartFile.fromPath(
-  //     'image',
-  //     compressedImage.path,
-  //     contentType: MediaType('image', 'jpeg'),
-  //   );
-  //   request.files.add(compressedImageFile);
-  // }
-
-
-  // Future<void> sendMultipartRequest() async {
-  //   if (_image == null || _image!.path.isEmpty) {
-  //     _image = await createTemporaryFileFromAsset("assets/images/man.png");
-  //   }
-  //
-  //   var request = http.MultipartRequest('POST', Uri.parse('baseupload'));
-  //
-  //   // Add other fields if needed
-  //   request.fields['regNo'] = 'dojy';
-  //   request.fields['phone'] = 'orginal';
-  //   request.fields['password'] = '12345';
-  //
-  //   // Add the image as a MultipartFile using the picked image path
-  //
-  //   var defaultImageFile = await http.MultipartFile.fromPath(
-  //     'image',
-  //     _image!.path,
-  //     contentType: MediaType('image', 'jpeg'),
-  //   );
-  //   request.files.add(defaultImageFile);
-  //
-  //   try {
-  //     var response = await request.send();
-  //     if (response.statusCode == 200) {
-  //       print('Request sent successfully');
-  //     } else {
-  //       print('Failed to send request. Status code: ${response.statusCode}');
-  //     }
-  //   } catch (error) {
-  //     print('Error sending request: $error');
-  //   }
-  // }
-
-  // Future<File> _compressImage(File image) async {
-  //   // Load the image using the image package
-  //   img.Image? originalImage = img.decodeImage(File(image.path).readAsBytesSync());
-  //
-  //   // Compress the image to achieve a target size (e.g., below 50 KB)
-  //   img.Image compressedImage = img.copyResize(originalImage!, width: 800);
-  //
-  //   // Convert the compressed image to Uint8List
-  //   Uint8List compressedBytes = img.encodeJpg(compressedImage);
-  //
-  //   // Create a temporary file and write the compressed bytes to it
-  //   File compressedFile = File('${Directory.systemTemp.path}/compressed_image.jpg');
-  //   compressedFile.writeAsBytesSync(compressedBytes);
-  //
-  //   return compressedFile;
-  // }
-
   Future<void> _pickImageFromGallery() async {
     final pickedFile =
-    await _picker.pickImage(source: ImageSource.gallery, imageQuality: 15);
+        await _picker.pickImage(source: ImageSource.gallery, imageQuality: 15);
     if (pickedFile != null) {
       _image = File(pickedFile.path);
     }
@@ -389,7 +392,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _pickImageFromCamera() async {
     final pickedFile =
-    await _picker.pickImage(source: ImageSource.camera, imageQuality: 15);
+        await _picker.pickImage(source: ImageSource.camera, imageQuality: 15);
     if (pickedFile != null) {
       _image = File(pickedFile.path);
     }
@@ -397,35 +400,35 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   late TextEditingController _firstname =
-  TextEditingController(text: userData?.firstName ?? "");
+      TextEditingController(text: userData?.firstName ?? "");
   late TextEditingController _lastname =
-  TextEditingController(text: userData?.lastName ?? "");
+      TextEditingController(text: userData?.lastName ?? "");
   late TextEditingController _phone =
-  TextEditingController(text: userData?.phone ?? "");
+      TextEditingController(text: userData?.phone ?? "");
   late TextEditingController _whatsapp =
-  TextEditingController(text: userData?.whatsAppno ?? "");
+      TextEditingController(text: userData?.whatsAppno ?? "");
   late TextEditingController _address =
-  TextEditingController(text: userData?.address ?? "");
+      TextEditingController(text: userData?.address ?? "");
   late TextEditingController _officeaddress =
-  TextEditingController(text: userData?.officeAddress ?? "");
+      TextEditingController(text: userData?.officeAddress ?? "");
   late TextEditingController _email =
-  TextEditingController(text: userData?.email ?? "");
+      TextEditingController(text: userData?.email ?? "");
   late TextEditingController _pincode =
-  TextEditingController(text: userData?.pincode ?? "");
+      TextEditingController(text: userData?.pincode ?? "");
   late TextEditingController _state =
-  TextEditingController(text: userData?.state ?? "");
+      TextEditingController(text: userData?.state ?? "");
   late TextEditingController _district =
-  TextEditingController(text: userData?.district);
+      TextEditingController(text: userData?.district);
   late TextEditingController _dob =
-  TextEditingController(text: userData?.dob ?? "");
+      TextEditingController(text: userData?.dob ?? "");
   late TextEditingController _clerkname1 =
-  TextEditingController(text: userData?.clerkName1);
+      TextEditingController(text: userData?.clerkName1);
   late TextEditingController _clerkphone1 =
-  TextEditingController(text: userData?.clerkPhone1);
+      TextEditingController(text: userData?.clerkPhone1);
   late TextEditingController _clerkname2 =
-  TextEditingController(text: userData?.clerkName2);
+      TextEditingController(text: userData?.clerkName2);
   late TextEditingController _clerkphone2 =
-  TextEditingController(text: userData?.clerkPhone2);
+      TextEditingController(text: userData?.clerkPhone2);
 
   bool isPressed = false;
 
@@ -445,21 +448,13 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    var height = MediaQuery
-        .of(context)
-        .size
-        .height;
-    var width = MediaQuery
-        .of(context)
-        .size
-        .width;
+    var height = MediaQuery.of(context).size.height;
+    var width = MediaQuery.of(context).size.width;
     // print("Current image: $_image");
 
     return GestureDetector(
       onTap: () {
-        if (!FocusScope
-            .of(context)
-            .hasPrimaryFocus) {
+        if (!FocusScope.of(context).hasPrimaryFocus) {
           FocusScope.of(context).unfocus();
         }
       },
@@ -492,31 +487,36 @@ class _ProfilePageState extends State<ProfilePage> {
                       children: [
                         Stack(
                           children: [
-                            CircleAvatar(
-                              radius: 55.sp,
-                              backgroundColor: Colors.grey.shade400,
-                              child: CircleAvatar(
-                                backgroundColor: Colors.white,
-                                radius: 50.sp,
-                                backgroundImage: userData?.image != null
-                                    ? MemoryImage(base64Decode(
-                                    userData!.image!),)
-                                    : _image?.path == null ? const AssetImage(
-                                    "assets/images/man.png") : Image
-                                    .file(File(_image!.path))
-                                    .image,
-                                // userData?.image == null
-                                //     ? _image?.path != null
-                                //         ? Image.file(File(_image!.path)).image
-                                //         : const AssetImage(
-                                //             "assets/images/man.png")
-                                //     //     as ImageProvider<Object>?
-                                //     : _image?.path == null
-                                //         ? Image.file(File(_image!.path)).image
-                                //         : MemoryImage(base64Decode(
-                                //             userData?.image ?? _image!.path)),
+                            if (userData?.image != null)
+                              CircleAvatar(
+                                radius: 55.sp,
+                                backgroundColor: Colors.grey.shade400,
+                                child: CircleAvatar(
+                                    backgroundColor: Colors.white,
+                                    radius: 50.sp,
+                                    backgroundImage: _image?.path == null
+                                        ? MemoryImage(
+                                            base64Decode(userData?.image),
+                                          )
+                                        : Image.file(File(_image!.path)).image
+                                    // const AssetImage(
+                                    //             "assets/images/man.png") as ImageProvider<Object>?
+                                    ),
                               ),
-                            ),
+                            if (userData?.image == null)
+                              CircleAvatar(
+                                radius: 55.sp,
+                                backgroundColor: Colors.grey.shade400,
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.white,
+                                  radius: 50.sp,
+                                  backgroundImage: _image?.path == null
+                                      ? const AssetImage(
+                                              "assets/images/man.png")
+                                          as ImageProvider<Object>?
+                                      : Image.file(File(_image!.path)).image,
+                                ),
+                              ),
                             Positioned(
                               left: width / 6.sp,
                               top: height * .09.sp,
@@ -544,7 +544,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             TextFieldOne(
                               readonly: false,
                               controller: _firstname,
-                              hinttext: "First name",
+                              hinttext: "Name",
                               onchange: (val) {
                                 userData?.firstName = val;
 
@@ -552,15 +552,15 @@ class _ProfilePageState extends State<ProfilePage> {
                               },
                               obsecuretxt: false,
                             ),
-                            TextFieldOne(
-                              readonly: false,
-                              controller: _lastname,
-                              hinttext: "Last name",
-                              onchange: (val) {
-                                userData?.lastName = val;
-                              },
-                              obsecuretxt: false,
-                            ),
+                            // TextFieldOne(
+                            //   readonly: false,
+                            //   controller: _lastname,
+                            //   hinttext: "Last name",
+                            //   onchange: (val) {
+                            //     userData?.lastName = val;
+                            //   },
+                            //   obsecuretxt: false,
+                            // ),
                             Row(
                               children: [
                                 Expanded(
@@ -575,13 +575,11 @@ class _ProfilePageState extends State<ProfilePage> {
                                 Checkbox(
                                     value: _whatschek,
                                     onChanged: (val) {
-                                      setState(() {
-                                        _whatschek = !_whatschek;
-                                        if (_whatschek == true) {
-                                          userData?.whatsAppno =
-                                              userData?.phone;
-                                        }
-                                      });
+                                      _whatschek = !_whatschek;
+                                      if (_whatschek == true) {
+                                        userData?.whatsAppno = userData?.phone;
+                                      }
+                                      setState(() {});
                                     }),
                                 SizedBox(
                                     width: 35.w,
@@ -614,31 +612,20 @@ class _ProfilePageState extends State<ProfilePage> {
                                 return null; // Return null if the validation is successful
                               },
                               onchange: (value) {
-                                // _enroll.currentState!.validate();
-                                // var enrolldate = value;
-                                userData?.dob = value();
+                                List<String> parts = value.split(' ');
+                                userData?.dob = parts[0];
                                 setState(() {});
                               },
                               obsecuretxt: false,
                               sufix: IconButton(
                                 onPressed: () async {
-                                  // _enroll.currentState!.validate();
-                                  var datePicked =
-                                  await DatePicker.showSimpleDatePicker(
-                                    context,
-                                    firstDate: DateTime(1900),
-                                    dateFormat: "dd/MM/yyyy",
-                                    locale: DateTimePickerLocale.en_us,
-                                    looping: true,
-                                  );
+                                  var datePicked = await DatePicker.showSimpleDatePicker(context, firstDate: DateTime(1900), dateFormat: "dd-MM-yyyy", locale: DateTimePickerLocale.en_us, looping: true,);
                                   if (datePicked != null) {
-                                    var enrolldate = DateFormat('dd/MM/yyyy')
-                                        .format(datePicked);
-                                    _dob.text = enrolldate;
-                                    userData?.dob = datePicked.toString();
-                                    setState(() {
-
-                                    });
+                                    // print(datePicked.toString());
+                                    var enrollDate = DateFormat('dd-MM-yyyy').format(datePicked);
+                                    _dob.text = enrollDate;
+                                    userData?.dob = enrollDate.toString();
+                                    setState(() {});
                                   }
                                 },
                                 icon: Icon(
@@ -661,7 +648,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               height: 120,
                               decoration: BoxDecoration(
                                   border:
-                                  Border.all(color: Colors.grey.shade600),
+                                      Border.all(color: Colors.grey.shade600),
                                   borderRadius: BorderRadius.circular(20)),
                               padding: const EdgeInsets.only(left: 10),
                               child: Padding(
@@ -674,14 +661,14 @@ class _ProfilePageState extends State<ProfilePage> {
                                   decoration: InputDecoration(
                                     hintText: "address",
                                     hintStyle:
-                                    const TextStyle(color: Colors.grey),
+                                        const TextStyle(color: Colors.grey),
                                     border: InputBorder.none,
                                     focusedBorder: InputBorder.none,
                                     enabledBorder: InputBorder.none,
                                     errorBorder: InputBorder.none,
                                     disabledBorder: InputBorder.none,
                                   ),
-                                  cursorColor: Colors.black,
+                                  cursorColor: Colors.white,
                                   maxLines: null,
                                   // Allow text to wrap to the next line
                                   onChanged: (val) {
@@ -697,7 +684,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               height: 120,
                               decoration: BoxDecoration(
                                   border:
-                                  Border.all(color: Colors.grey.shade600),
+                                      Border.all(color: Colors.grey.shade600),
                                   borderRadius: BorderRadius.circular(20)),
                               padding: const EdgeInsets.only(left: 10),
                               child: TextField(
@@ -714,7 +701,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   errorBorder: InputBorder.none,
                                   disabledBorder: InputBorder.none,
                                 ),
-                                cursorColor: Colors.black,
+                                cursorColor: Colors.white,
                                 maxLines: null,
                                 // Allow text to wrap to the next line
                                 onChanged: (val) {
@@ -774,10 +761,10 @@ class _ProfilePageState extends State<ProfilePage> {
                                       borderRadius: BorderRadius.circular(18)),
                                   child: Padding(
                                     padding:
-                                    const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                        const EdgeInsets.fromLTRB(10, 0, 10, 0),
                                     child: DropdownButton<String>(
                                       hint: Text(
-                                        "BloodGroup",
+                                        bloodGroup,
                                         style: TextStyle(
                                             color: Colors.grey.withOpacity(.8)),
                                       ),
@@ -787,6 +774,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                       onChanged: (newValue) {
                                         setState(() {
                                           selectedValue = newValue!;
+                                          userData?.bloodGroup = selectedValue;
                                         });
                                       },
                                       items: <String>[
@@ -800,16 +788,16 @@ class _ProfilePageState extends State<ProfilePage> {
                                         'O-',
                                         "N/A",
                                       ].map<DropdownMenuItem<String>>(
-                                              (String value) {
-                                            return DropdownMenuItem<String>(
-                                              value: value,
-                                              child: Text(
-                                                value,
-                                                style:
+                                          (String value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(
+                                            value,
+                                            style:
                                                 TextStyle(color: Colors.grey),
-                                              ),
-                                            );
-                                          }).toList(),
+                                          ),
+                                        );
+                                      }).toList(),
                                     ),
                                   ),
                                 ),
@@ -826,19 +814,23 @@ class _ProfilePageState extends State<ProfilePage> {
                                 Checkbox(
                                     value: _welfare,
                                     onChanged: (val) {
-                                      setState(() {
-                                        _welfare = !_welfare;
-                                        if (_welfare == true) {
-                                          _welfare = true;
-                                          userData?.welfareMember = "yes";
-                                          welfareData = "yes";
-
-                                        } else {
-                                          _welfare = false;
-                                          userData?.welfareMember = "no";
-                                          welfareData = "no";
-                                        }
-                                      });
+                                      _welfare = !_welfare;
+                                      if (_welfare == true) {
+                                        _welfare = true;
+                                        userData?.welfareMember = "yes";
+                                        welfareData = "yes";
+                                        setState(() {
+                                          print(welfareData);
+                                        });
+                                      } else if (_welfare == false) {
+                                        _welfare = false;
+                                        userData?.welfareMember = "no";
+                                        welfareData = "no";
+                                        setState(() {
+                                          print(welfareData);
+                                        });
+                                      }
+                                      // setState(() {});
                                     })
                               ],
                             ),
@@ -866,17 +858,13 @@ class _ProfilePageState extends State<ProfilePage> {
                               child: ElevatedButton(
                                   onPressed: () async {
                                     final SharedPreferences prefs =
-                                    await SharedPreferences.getInstance();
+                                        await SharedPreferences.getInstance();
                                     var regNo = prefs.getString("regNo");
-                                    // if (regNo == null) {
-                                    //   box.clear();
-                                    // }
                                     addData();
                                     Navigator.pushReplacement(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (context) =>
-                                          regNo != null
+                                          builder: (context) => regNo != null
                                               ? BottomNavigationPage()
                                               : Login(),
                                         ));

@@ -1,7 +1,12 @@
+import 'dart:convert';
+import 'package:http/http.dart'as http;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
+import '../constants/constants.dart';
+import '../model/imagemodel.dart';
+import '../model/user_model.dart';
 import '../model/userslist_model.dart';
 
 
@@ -13,7 +18,15 @@ class ControllerData extends ChangeNotifier {
   List<UserList> _usersList = [];
   String _userid = '';
   String _password = '';
+  var  _aboutPage = [];
 
+
+  get aboutPage => _aboutPage;
+
+  set aboutPage(var value) {
+    _aboutPage = value;
+    notifyListeners();
+  }
 
   Map<String,dynamic> get loginResponse => _loginResponse;
 
@@ -44,6 +57,158 @@ class ControllerData extends ChangeNotifier {
     notifyListeners();
   }
 
+  String _amount = '';
+
+  String get amount => _amount;
+
+  set amount(String value) {
+    _amount = value;
+  }
+
+  List<UserList> _usersLists = [];
+
+  List<UserList> get usersLists => _usersList;
+
+  void updateUsersList(List<UserList> newList) {
+  _usersList.addAll(newList);
+  notifyListeners();
+  }
+
+}
 
 
+class MyPhoneDirectoryProvider extends ChangeNotifier {
+  List<UserList> contacts = [];
+  List<UserList> filteredContacts = [];
+  int currentPage = 0;
+  bool isLoading = false;
+  bool reachedEnd = false;
+  bool isSearching = false;
+
+  Future<void> fetchData() async {
+    if (isLoading || reachedEnd || isSearching) return;
+
+    isLoading = true;
+
+    try {
+      final response = await http.post(Uri.parse('$baseUrl/list_users'),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "page": currentPage,
+        }),
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> dataList = json.decode(response.body);
+        List<UserList> newUsersList = dataList.map((json) => UserList.fromJson(json)).toList();
+        if (newUsersList.isEmpty) {
+          reachedEnd = true;
+        } else {
+          contacts.addAll(newUsersList);
+          filteredContacts = contacts;
+          currentPage++;
+          notifyListeners();
+        }
+      } else {
+        // Error in API call
+        print('Failed to load user data. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      // Exception during API call
+      print('Error: $e');
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+
+
+
+  Future<void> searchData(String query) async {
+    if (query.isEmpty) {
+      // If search query is empty, perform pagination with existing logic
+      fetchData();
+      notifyListeners();
+      return;
+    }
+
+    isSearching = true;
+    isLoading = true;
+
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/search_users'),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "search": query,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> dataList = json.decode(response.body);
+        List<UserList> searchResults =
+        dataList.map((json) => UserList.fromJson(json)).toList();
+
+        filteredContacts = searchResults;
+      } else {
+        // Error in API call
+        print(
+            'Failed to load search results. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      // Exception during API call
+      print('Error: $e');
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Add a method to clear the search query and revert to regular pagination
+  void clearSearch() {
+    isSearching = false;
+    filteredContacts = contacts;
+    currentPage = 1;
+    reachedEnd = false;
+    // fetchData();
+  }
+}
+
+
+
+class UserDataProvider extends ChangeNotifier {
+  User? data;
+
+  Future<void> fetchUserData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var userdat = prefs.getString("regNo");
+    try {
+      final response = await http.post(
+        Uri.parse("$baseUrl/get_by_regno"),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(
+          {
+            "regNo": userdat,
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        dynamic user = jsonDecode(response.body);
+        box.put(0, user[0]);
+        Map<String, dynamic> userdata = box.get(0);
+        Map<String, dynamic> userDat = userdata;
+        data = User.fromJson(userDat);
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+    notifyListeners();
+  }
 }

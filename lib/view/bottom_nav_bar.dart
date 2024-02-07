@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:taba_app_android/view/notification.dart';
 import 'package:taba_app_android/view/paymentpage.dart';
 import 'package:taba_app_android/view/profile.dart';
-
 import '../widgets/appdrawer.dart';
-import 'diarectory_page.dart';
+import 'dirpage2.dart';
+import 'dirpage3.dart';
 
 
 class BottomNavigationPage extends StatefulWidget {
@@ -15,9 +16,10 @@ class _BottomNavigationPageState extends State<BottomNavigationPage> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    MyPhoneDirectory(),
+    MyPhoneDirectoryPage(),
     PaymentPage(),
-    ProfilePage(),
+    ProfilePage()
+
   ];
 
   @override
@@ -25,6 +27,12 @@ class _BottomNavigationPageState extends State<BottomNavigationPage> {
     return Scaffold(
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white),
+        title: Center(child: Text("TABA",style: TextStyle(color: Colors.white))),
+        actions: [
+          IconButton(onPressed: (){
+            Navigator.push(context, MaterialPageRoute(builder: (context) => NotificationPage(),));
+          }, icon: Icon(Icons.notifications_active,color: Colors.white,))
+        ],
       ),
       drawer: AppDrawer(),
       body: _pages[_currentIndex],

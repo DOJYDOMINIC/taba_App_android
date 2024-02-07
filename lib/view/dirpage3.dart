@@ -2,13 +2,12 @@
 // import 'package:flutter/material.dart';
 // import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 // import 'package:flutter_screenutil/flutter_screenutil.dart';
-// import 'package:http/http.dart' as http;
 // import 'package:provider/provider.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
 // import '../constants/constants.dart';
 // import '../controller/controllers.dart';
 // import '../model/user_model.dart';
 // import '../model/userslist_model.dart';
+//
 //
 // class MyPhoneDirectory extends StatefulWidget {
 //   @override
@@ -18,80 +17,86 @@
 // class _MyPhoneDirectoryState extends State<MyPhoneDirectory> {
 //   List<UserList> contacts = []; // Use UsersList instead of Contact
 //   List<UserList> filteredContacts = [];
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     userData();
-//     fetchData();
-//   }
-//
-//   Future<void> fetchData() async {
-//     var pro = Provider.of<ControllerData>(context, listen: false);
-//
-//     try {
-//       final response = await http.post(
-//         Uri.parse('$baseUrl/list_users'),
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//         body: jsonEncode({
-//           "page": 1,
-//         }),
-//       );
-//
-//       if (response.statusCode == 200) {
-//         final List<dynamic> dataList = json.decode(response.body);
-//         List<UserList> usersList =
-//             dataList.map((json) => UserList.fromJson(json)).toList();
-//
-//         pro.usersList = usersList;
-//         contacts = pro.usersList;
-//         filteredContacts = contacts;
-//         setState(() {});
-//       } else {
-//         // Error in API call
-//         print('Failed to load user data. Status code: ${response.statusCode}');
-//       }
-//     } catch (e) {
-//       // Exception during API call
-//       print('Error: $e');
-//     }
-//   }
-//
+//   //
+//   // @override
+//   // void initState() {
+//   //   super.initState();
+//   //   userData();
+//   //   fetchData(context);
+//   // }
+//   //
+//   // Future<void> fetchData(BuildContext context) async {
+//   //   var pro = Provider.of<ControllerData>(context, listen: false);
+//   //   try {
+//   //     final response = await http.post(
+//   //       Uri.parse('$baseUrl/list_users'),
+//   //       headers: {
+//   //         "Content-Type": "application/json",
+//   //       },
+//   //       body: jsonEncode({
+//   //         "page": "1",
+//   //       }),
+//   //     );
+//   //
+//   //     if (response.statusCode == 200) {
+//   //       final List<dynamic> dataList = json.decode(response.body);
+//   //       print(dataList.toString());
+//   //       List<UserList> usersList =
+//   //       dataList.map((json) => UserList.fromJson(json)).toList();
+//   //
+//   //       // pro.usersList = usersList;
+//   //       // Assuming 'contacts' and 'filteredContacts' are lists you want to update
+//   //       // contacts = pro.usersList;
+//   //       // filteredContacts = contacts;
+//   //
+//   //       // Uncomment the next line if this is Flutter code and you have access to the context
+//   //       // setState(() {});
+//   //
+//   //       print('API call successful. Users data loaded.');
+//   //     } else {
+//   //       // Error in API call
+//   //       print('Failed to load user data. Status code: ${response.statusCode}');
+//   //     }
+//   //   } catch (e) {
+//   //     // Exception during API call
+//   //     print('Error: $e');
+//   //   }
+//   // }
+//   //
+//   //
 //   User? data;
-//
-//   Future<void> userData() async {
-//     // var pro = Provider.of<ControllerData>(context, listen: false);
-//     final SharedPreferences prefs = await SharedPreferences.getInstance();
-//     var userdat = prefs.getString("regNo");
-//     try {
-//
-//       final response = await http.post(
-//         Uri.parse("$baseUrl/get_by_regno"),
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//         body: jsonEncode(
-//           {
-//             "regNo": userdat,
-//           },
-//         ),
-//       );
-//
-//       if (response.statusCode == 200) {
-//         // var pro = Provider.of<ControllerData>(context, listen: false);
-//
-//           var user = jsonDecode(response.body);
-//           box.put(0, user[0]);
-//           Map<String,dynamic> profileData = box.get(0);
-//           data = User.fromJson(profileData);
-//           setState(() {});
-//       }
-//     } catch (e) {
-//       print('Error: $e');
-//     }
-//   }
+//   //
+//   // Future<void> userData() async {
+//   //   // var pro = Provider.of<ControllerData>(context, listen: false);
+//   //   final SharedPreferences prefs = await SharedPreferences.getInstance();
+//   //   var userdat = prefs.getString("regNo");
+//   //   try {
+//   //
+//   //     final response = await http.post(
+//   //       Uri.parse("$baseUrl/get_by_regno"),
+//   //       headers: {
+//   //         "Content-Type": "application/json",
+//   //       },
+//   //       body: jsonEncode(
+//   //         {
+//   //           "regNo": userdat,
+//   //         },
+//   //       ),
+//   //     );
+//   //
+//   //     if (response.statusCode == 200) {
+//   //       // var pro = Provider.of<ControllerData>(context, listen: false);
+//   //
+//   //         var user = jsonDecode(response.body);
+//   //         box.put(0, user[0]);
+//   //         Map<String,dynamic> profileData = box.get(0);
+//   //         data = User.fromJson(profileData);
+//   //         setState(() {});
+//   //     }
+//   //   } catch (e) {
+//   //     print('Error: $e');
+//   //   }
+//   // }
 //
 //   @override
 //   Widget build(BuildContext context) {
@@ -153,9 +158,11 @@
 //                 decoration: myInputDecoration,
 //               ),
 //               Expanded(
-//                 child: filteredContacts.isEmpty
-//                     ? Center(child: CircularProgressIndicator())
-//                     : ListView.builder(
+//                 child:
+//                 // filteredContacts.isEmpty
+//                     // ? Center(child: CircularProgressIndicator())
+//                     // :
+//                 ListView.builder(
 //                         itemCount: filteredContacts.length,
 //                         itemBuilder: (context, index) {
 //                           return Padding(
@@ -186,8 +193,7 @@
 //                                                         .image !=
 //                                                     null
 //                                                 ? MemoryImage(base64Decode(
-//                                                     filteredContacts[index]
-//                                                         .image))
+//                                                     filteredContacts[index].image))
 //                                                 : const AssetImage(
 //                                                         'assets/images/man.png')
 //                                                     as ImageProvider<Object>,
