@@ -13,45 +13,34 @@ class PasswordResetPage extends StatefulWidget {
 }
 
 class _PasswordResetPageState extends State<PasswordResetPage> {
-  TextEditingController phoneController = TextEditingController();
+  TextEditingController regNo = TextEditingController();
   TextEditingController newPasswordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-
-
     Future<void> restPassword() async {
       try {
-
         final response = await http.post(
           Uri.parse("$baseUrl/reset-password"),
           headers: {
             "Content-Type": "application/json",
           },
           body: jsonEncode({
-            // "regNo": regNo,
-            "phone": phoneController.text.toString(),
-            // "password": pass,
+            "regNo": regNo.text.toString(),
             "newPassword": newPasswordController.text.toString(),
           }),
         );
 
         if (response.statusCode == 200) {
           var data = jsonDecode(response.body);
-
           showPlatformDialog(context, data["message"]);
-
-          // Navigator.pushReplacement(
-          //     context,
-          //     MaterialPageRoute(
-          //       builder: (context) => Login(),
-          //     ));
         } else {
           var data = jsonDecode(response.body);
           showPlatformDialog(context, data["message"]);
           // print(response.body);
           // Handle error appropriately (e.g., show an error message to the user)
-          print("Error - Status Code: ${response.statusCode}, ${response.body}");
+          print(
+              "Error - Status Code: ${response.statusCode}, ${response.body}");
         }
       } catch (e) {
         // showPlatformDialog(context, "something went wrong");
@@ -59,6 +48,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
         // Handle exceptions (e.g., network issues, timeout) appropriately
       }
     }
+
     return GestureDetector(
       onTap: () {
         if (!FocusScope.of(context).hasPrimaryFocus) {
@@ -67,38 +57,41 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
       },
       child: Scaffold(
         backgroundColor: Colors.black,
-
+        appBar: AppBar(
+            centerTitle: true,
+            leading: IconButton(onPressed: (){
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Login(),));
+            }, icon:Icon(Icons.arrow_back,color: Colors.white,)),
+            title: Text(
+              "Reset Password",
+              style: TextStyle(color: Colors.white),
+            )),
         body: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(18.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text("Forgot Password",style: TextStyle(color: Colors.white,fontSize: 18,fontWeight: FontWeight.bold,),),
-              SizedBox(height: 10.sp,),
-
               SizedBox(
-                  width: 200,
-                  child: Divider(color: Colors.grey,thickness: 2,)),
-              SizedBox(height: 50.sp,),
+                height: 50.sp,
+              ),
               TextField(
-                controller: phoneController,
-                keyboardType: TextInputType.phone,
+                style: TextStyle(color: Colors.white),
+                controller: regNo,
                 decoration: InputDecoration(
-                  labelText: 'Phone Number',
-                    labelStyle: TextStyle(color: Colors.white)
-
-                  // hintText: 'Enter your phone number',
+                  labelText: 'Register Number',
+                  labelStyle: TextStyle(color: Colors.white),
                 ),
               ),
               SizedBox(height: 16.0),
               TextField(
+                style: TextStyle(color: Colors.white),
                 controller: newPasswordController,
                 obscureText: true,
                 decoration: InputDecoration(
-                  labelText: 'New Password',
-                  labelStyle: TextStyle(color: Colors.white)
-                  // hintText: 'Enter your new password',
-                ),
+                    labelText: 'New Password',
+                    labelStyle: TextStyle(color: Colors.white)
+                    // hintText: 'Enter your new password',
+                    ),
               ),
               SizedBox(height: 32.0),
               ElevatedButton(
@@ -115,6 +108,8 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                   // String phone = phoneController.text;
                   // String newPassword = newPasswordController.text;
                   restPassword();
+                  regNo.clear();
+                  newPasswordController.clear();
                   // Implement your password reset logic (e.g., API call, validation)
                 },
                 child: Text('Reset Password'),

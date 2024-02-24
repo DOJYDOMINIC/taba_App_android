@@ -54,15 +54,18 @@ class _RegistrationState extends State<Registration> {
   String? _password;
   String? _confirmpassword;
 
-User? userData;
+  User? userData;
+
   fetchData() {
     try {
       // Your asynchronous code, e.g., making an HTTP request
-      Map<String,dynamic> result = box.get(0);
+      Map<String, dynamic> result = box.get(0);
       userData = User.fromJson(result);
       print(userData?.firstName);
       // addData();
-    } catch (error) {debugPrint("Hive: $error");}
+    } catch (error) {
+      debugPrint("Hive: $error");
+    }
   }
 
   @override
@@ -71,7 +74,6 @@ User? userData;
     var height = MediaQuery.of(context).size.height;
 
     // double top = MediaQuery.of(context).padding.top;
-
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -141,6 +143,27 @@ User? userData;
                     Form(
                       key: _enroll,
                       child: TextFieldOne(
+                        ontap: ()async{
+                          // _enroll.currentState!.validate();
+                          var datePicked =
+                          await DatePicker.showSimpleDatePicker(
+                            context,
+                            firstDate: DateTime(1900),
+                            lastDate: DateTime.now(),
+                            dateFormat: "dd/MM/yyyy",
+                            locale: DateTimePickerLocale.en_us,
+                            looping: true,
+                            // pickerMode: DateTimePickerMode.date
+                          );
+                          if (datePicked != null) {
+                            _enroll.currentState!.validate();
+                            enrolldate = DateFormat('dd/MM/yyyy').format(datePicked);
+                            enrolldatecontroller.text = enrolldate;
+                            userData?.enrollmentDate = enrolldate;
+                            setState(() {});
+                          }
+                          setState(() {});
+                        },
                         hinttext: "Enrollment date",
                         keytype: TextInputType.number,
                         controller: enrolldatecontroller,
@@ -160,7 +183,6 @@ User? userData;
                           enrolldate = value;
                           userData?.enrollmentDate = value;
 
-
                           // setState(() {});
                         },
                         obsecuretxt: false,
@@ -171,27 +193,27 @@ User? userData;
                                 await DatePicker.showSimpleDatePicker(
                               context,
                               firstDate: DateTime(1900),
-                              dateFormat: "dd-MM-yyyy",
+                              dateFormat: "dd/MM/yyyy",
                               locale: DateTimePickerLocale.en_us,
                               looping: true,
-                                  // pickerMode: DateTimePickerMode.date
+
+                              // pickerMode: DateTimePickerMode.date
                             );
                             if (datePicked != null) {
                               _enroll.currentState!.validate();
-                              enrolldate = DateFormat('dd-MM-yyyy').format(datePicked);
+                              enrolldate = DateFormat('dd/MM/yyyy').format(datePicked);
                               enrolldatecontroller.text = enrolldate;
                               userData?.enrollmentDate = enrolldate;
-
+                              setState(() {});
                             }
-                            setState(() {
-                            });
+                            setState(() {});
                           },
                           icon: Icon(
                             Icons.calendar_month,
                             color: Colors.grey,
                           ),
                         ),
-                        readonly: false,
+                        readonly: true,
                       ),
                     ),
                     TextFieldOne(
@@ -233,7 +255,6 @@ User? userData;
                       onchange: (value) {
                         setState(() {
                           _confirmpassword = value;
-                          // debugPrint(_phoneNumber);
                         });
                       },
                       obsecuretxt: _obscureconfirmpassword,
@@ -268,25 +289,26 @@ User? userData;
                               MaterialStateProperty.all(Colors.white),
                         ),
                         onPressed: () async {
-                          final SharedPreferences prefs = await SharedPreferences.getInstance();
+                          final SharedPreferences prefs =
+                              await SharedPreferences.getInstance();
                           var regNo = prefs.getString("regNo");
                           prefs.clear();
                           if (regNo == null) {
                             box.clear();
                           }
-                       Map<String,dynamic> collectedData= {
-                         "regNo": regNumber.text,
-                         "password": password.text,
-                         "enrollmentDate": enrolldatecontroller.text,
-                       };
+                          Map<String, dynamic> collectedData = {
+                            "regNo": regNumber.text,
+                            "password": password.text,
+                            "enrollmentDate": enrolldatecontroller.text,
+                          };
 
                           // print(collectedData["regNo"]);
-
 
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => ProfilePage(item : collectedData),
+                                builder: (context) =>
+                                    ProfilePage(item: collectedData),
                               ));
 
                           // Navigator.push(

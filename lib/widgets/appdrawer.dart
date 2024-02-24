@@ -4,7 +4,6 @@ import 'package:taba_app_android/constants/constants.dart';
 import '../view/aboutpage.dart';
 import '../view/bottom_nav_bar.dart';
 import '../view/login.dart';
-import '../view/profile.dart';
 
 class AppDrawer extends StatelessWidget {
   @override
@@ -20,14 +19,12 @@ class AppDrawer extends StatelessWidget {
         width: width / 1.5,
         backgroundColor: Colors.black,
         child: Container(
-          decoration: BoxDecoration(
-            color: Colors.grey.shade900
-          ),
+          decoration: BoxDecoration(color: Colors.grey.shade900),
           child: ListView(
             physics: ClampingScrollPhysics(),
             padding: EdgeInsets.zero,
             children: [
-             const DrawerHeader(
+              const DrawerHeader(
                 child: Text('TABA', style: TextStyle(color: Colors.white)),
                 decoration: BoxDecoration(
                   color: Colors.black,
@@ -67,7 +64,7 @@ class AppDrawer extends StatelessWidget {
                 onTap: () async {
                   final SharedPreferences prefs =
                       await SharedPreferences.getInstance();
-                  prefs.clear();
+                  prefs.remove("regNo");
                   box.clear();
                   // Handle logout logic
                   Navigator.pop(context); // Close the drawer

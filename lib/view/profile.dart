@@ -34,6 +34,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
+    context.read<UserDataProvider>().fetchUserData();
     fetchData();
     whatsappNumber();
     welfare();
@@ -42,6 +43,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   User? userData;
+
   var result;
   var regNo = "";
 
@@ -54,34 +56,6 @@ class _ProfilePageState extends State<ProfilePage> {
       }
     } catch (error) {
       debugPrint("Hive: $error");
-    }
-  }
-
-  Future<void> profileData() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    var userdat = prefs.getString("regNo");
-    try {
-      final response = await http.post(
-        Uri.parse("$baseUrl/get_by_regno"),
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode(
-          {
-            "regNo": userdat,
-          },
-        ),
-      );
-
-      if (response.statusCode == 200) {
-        var user = jsonDecode(response.body);
-        box.put(0, user[0]);
-        Map<String, dynamic> profileData = box.get(0);
-       userData = User.fromJson(profileData);
-        setState(() {});
-      }
-    } catch (e) {
-      print('Error: $e');
     }
   }
 
@@ -281,15 +255,15 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  Future<File> createTemporaryFileFromAsset(String assetPath) async {
-    final ByteData data = await rootBundle.load(assetPath);
-    final List<int> bytes = data.buffer.asUint8List();
-    final String tempFileName =
-        DateTime.now().millisecondsSinceEpoch.toString();
-    final File tempFile = File('${Directory.systemTemp.path}/$tempFileName');
-    await tempFile.writeAsBytes(bytes, flush: true);
-    return tempFile;
-  }
+  // Future<File> createTemporaryFileFromAsset(String assetPath) async {
+  //   final ByteData data = await rootBundle.load(assetPath);
+  //   final List<int> bytes = data.buffer.asUint8List();
+  //   final String tempFileName =
+  //       DateTime.now().millisecondsSinceEpoch.toString();
+  //   final File tempFile = File('${Directory.systemTemp.path}/$tempFileName');
+  //   await tempFile.writeAsBytes(bytes, flush: true);
+  //   return tempFile;
+  // }
 
   Future<File> _compressImage(File image) async {
     // Read the image file as bytes
@@ -297,9 +271,9 @@ class _ProfilePageState extends State<ProfilePage> {
     // Compress the image with target size (50 KB)
     List<int> compressedBytes = await FlutterImageCompress.compressWithList(
       imageBytes,
-      minHeight: 800, // Adjust the height and width based on your requirements
-      minWidth: 800,
-      quality: 50, // Adjust the quality as needed
+      minHeight: 200, // Adjust the height and width based on your requirements
+      minWidth: 200,
+      quality: 70, // Adjust the quality as needed
       format: CompressFormat.jpeg,
     );
 
@@ -448,6 +422,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    var pro= Provider.of<UserDataProvider>(context);
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
     // print("Current image: $_image");
@@ -566,6 +541,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 Expanded(
                                   child: TextFieldOne(
                                       readonly: false,
+                                      keytype: TextInputType.phone,
                                       controller: _phone,
                                       hinttext: "phone",
                                       onchange: (val) {
@@ -592,12 +568,23 @@ class _ProfilePageState extends State<ProfilePage> {
                               TextFieldOne(
                                   readonly: false,
                                   controller: _whatsapp,
+                                  keytype: TextInputType.phone,
                                   hinttext: "Whatsapp number",
                                   onchange: (val) {
                                     userData?.whatsAppno = val;
                                   }),
                             TextFieldOne(
-                              readonly: false,
+                              readonly: true,
+                              ontap: ()async{
+                                var datePicked = await DatePicker.showSimpleDatePicker(context, firstDate: DateTime(1900), dateFormat: "dd-MM-yyyy", locale: DateTimePickerLocale.en_us, looping: true,);
+                                if (datePicked != null) {
+                                  // print(datePicked.toString());
+                                  var enrollDate = DateFormat('dd-MM-yyyy').format(datePicked);
+                                  _dob.text = enrollDate;
+                                  userData?.dob = enrollDate.toString();
+                                  setState(() {});
+                                }
+                              },
                               hinttext: "DOB",
                               keytype: TextInputType.number,
                               controller: _dob,
@@ -719,6 +706,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             TextFieldOne(
                                 readonly: false,
                                 controller: _clerkphone1,
+                                keytype: TextInputType.phone,
                                 hinttext: "Clerk 1 Phone",
                                 onchange: (val) {
                                   userData?.clerkPhone1 = val ?? "";
@@ -733,6 +721,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             TextFieldOne(
                                 readonly: false,
                                 controller: _clerkphone2,
+                                keytype: TextInputType.phone,
                                 hinttext: "Clerk 2 phone",
                                 onchange: (val) {
                                   userData?.clerkPhone2 = val ?? "";
@@ -744,6 +733,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             TextFieldOne(
                                 readonly: false,
                                 controller: _pincode,
+                                keytype: TextInputType.number,
                                 hinttext: "pincode",
                                 onchange: (val) {
                                   userData?.pincode = val ?? "";

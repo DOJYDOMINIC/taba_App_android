@@ -3,10 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive/hive.dart';
 
-const baseUrl = "http://94.176.237.33:3000/api/user";
-const Color appcolor = Color.fromRGBO(125, 125, 125, 100);
-  final box = Hive.box('data_box');
 
+const url = "https://aba.zenonsystems.com/api";
+
+
+const baseUrl = "$url/user";
+const adminBaseUrl = "http://$url/admin";
+const notificationUrl = "http://$url/notification";
+
+final box = Hive.box('data_box');
+
+const Color appColor = Color.fromRGBO(125, 125, 125, 100);
 
 //Decoration
 InputDecoration myInputDecoration = InputDecoration(
@@ -24,7 +31,7 @@ InputDecoration myInputDecoration = InputDecoration(
     borderRadius: BorderRadius.circular(10.sp),
     borderSide: BorderSide(
       width: 2.w,
-      color: appcolor.withOpacity(.3),
+      color: appColor.withOpacity(.3),
     ),
   ),
   hintText: 'Search',
@@ -34,7 +41,7 @@ InputDecoration myInputDecoration = InputDecoration(
     borderRadius: BorderRadius.circular(10.sp),
     borderSide: BorderSide(
       width: 2.w,
-      color: appcolor,
+      color: appColor,
     ),
   ),
   border: OutlineInputBorder(

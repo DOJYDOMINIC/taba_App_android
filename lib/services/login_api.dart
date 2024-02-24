@@ -1,53 +1,99 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taba_app_android/constants/constants.dart';
-import '../controller/controllers.dart';
 import '../view/bottom_nav_bar.dart';
 import '../widgets/dialog.dart';
+import 'package:http/http.dart' show ClientException;
 
 Future<void> loginApi(BuildContext context, String regNo, String pass) async {
-  try {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+  print("api called");
 
-    final response = await http.post(
-      Uri.parse("$baseUrl/login"),
+  try {
+    final response = await http.post(Uri.parse("$baseUrl/login"),
       headers: {
         "Content-Type": "application/json",
       },
       body: jsonEncode({
         "regNo": regNo,
-        // "regNo": "K/69/2002",
         "password": pass,
-        // "password": "1234",
       }),
     );
-    prefs.clear();
+    var data = jsonDecode(response.body);
+
     if (response.statusCode == 200) {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var pro = Provider.of<ControllerData>(context, listen: false);
-      var data = jsonDecode(response.body);
-      pro.userid = data["user"]["regNo"];
-      var id = data["user"]["_id"];
-      prefs.setString("regNo", pro.userid);
-      prefs.setString("id", id);
-      Navigator.pushReplacement(
+      var fCMToken = prefs.getString("fCMToken");
+      if (fCMToken != null) {
+        var data = jsonDecode(response.body);
+        var regNo = data["user"]["regNo"];
+        var id = data["user"]["_id"];
+        prefs.setString("regNo", regNo);
+        prefs.setString("id", id);
+        // Assuming notificationPost and showPlatformDialog are defined elsewhere
+        notificationPost(fCMToken,context);
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => BottomNavigationPage(),
-          ));
+            builder: (context) =>
+                BottomNavigationPage(), // Replace with the appropriate destination page
+          ),
+        );
+      }// Show appropriate error message
     } else {
-      var data = jsonDecode(response.body);
-      showPlatformDialog(context, data["message"]);
-      // print(response.body);
-      // Handle error appropriately (e.g., show an error message to the user)
-      print("Error - Status Code: ${response.statusCode}, ${response.body}");
+      if(response.statusCode == 401){
+        showPlatformDialog(context, data["message"]);
+      }else if(response.statusCode == 403){
+        showPlatformDialog(context, data["message"]); // Show error message from the API response
+      }else{
+        showPlatformDialog(context, data["message"]); // Show error message from the API response
+      }
     }
+  } on http.ClientException catch (_) {
+    showPlatformDialog(
+        context, "Something went wrong"); // Show a generic error message
   } catch (e) {
-    // showPlatformDialog(context, "something went wrong");
     debugPrint("Exception during API call: $e");
-    // Handle exceptions (e.g., network issues, timeout) appropriately
+    showPlatformDialog(
+        context, "Something went wrong"); // Show a generic error message
   }
 }
+
+
+
+
+
+
+
+Future<void> notificationPost(String token, BuildContext context) async {
+  try {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var regNo = prefs.getString("regNo");
+    final response = await http.post(
+      Uri.parse("$notificationUrl/register-device"),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "regNo": regNo,
+        "token": token,
+      }),
+    );
+    print(token);
+
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      debugPrint(response.body.toString());
+    } else {
+      throw Exception('Failed to post notification: ${response.statusCode}');
+    }
+  } on ClientException catch (e) {
+    // Handle ClientException (e.g., network error)
+    print('ClientException: $e');
+  } catch (e) {
+    // Handle other exceptions
+    print('Error posting notification: $e');
+  }
+}
+

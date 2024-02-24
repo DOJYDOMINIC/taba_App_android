@@ -1,6 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:taba_app_android/constants/constants.dart';
+
+import 'bottom_nav_bar.dart';
+import 'dir_page.dart';
 
 class Member {
   final String? name;
@@ -33,7 +37,7 @@ class _AboutPageState extends State<AboutPage> {
   var data;
 
   Future<void> fetchData() async {
-    final url = Uri.parse('http://94.176.237.33:3000/api/admin/about');
+    final url = Uri.parse('$adminBaseUrl/about');
     final response = await http.get(url, headers: {
       "Content-Type": "application/json",
     });
@@ -75,48 +79,57 @@ class _AboutPageState extends State<AboutPage> {
     ];
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade200,
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: Text('Executive Committee'),
+        backgroundColor: Colors.black,
+        title: Text('Executive Committee',style: TextStyle(color: Colors.white),),
         centerTitle: true,
+        leading: IconButton(
+            onPressed: () {
+              Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => BottomNavigationPage(),));
+            },
+            icon: Icon(
+              Icons.arrow_back,
+              color: Colors.white,
+            )),
+
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildMemberWidget(president),
-                  // SizedBox(height: 20),
-                  _buildMemberWidget(secretary),
-                ],
-              ),
-              _buildMemberWidget(librarian),
-              SizedBox(height: 20),
-              Text(
-                'Executive Members:',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 30),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
+          child: SafeArea(
+            child:data == null ? Center(child: CircularProgressIndicator()): Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
                   children: [
-                    for (var member in executiveMembers)
-                      Row(
-                        children: [
-                          _buildMemberWidget(member),
-                          SizedBox(width: 30),
-                        ],
-                      ),
+                    _buildMemberWidget(president),
+                    _buildMemberWidget(secretary),
+                    _buildMemberWidget(librarian),
                   ],
                 ),
-              ),
-            ],
+                Text(
+                  'Executive Members',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,color: Colors.white,),
+                ),
+               const SizedBox(height: 30),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      for (var member in executiveMembers)
+                        Row(
+                          children: [
+                            _buildMemberWidget(member),
+                            SizedBox(width: 30),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 20,),
+              ],
+            ),
           ),
         ),
       ),
@@ -127,24 +140,31 @@ class _AboutPageState extends State<AboutPage> {
     return Column(
       children: [
         CircleAvatar(
-          radius: 50,
-          backgroundImage: member.image != null
-              ? MemoryImage(base64Decode(member.image!))
-              : AssetImage('assets/images/man.png') as ImageProvider<Object>?,
+          radius: 43,
+          backgroundColor: Colors.grey.shade300,
+          child: CircleAvatar(
+            radius: 40,
+            backgroundImage: member.image != null
+                ? MemoryImage(base64Decode(member.image!))
+                : AssetImage('assets/images/man.png') as ImageProvider<Object>?,
+          ),
         ),
         SizedBox(height: 10),
         Text(
           member.name ?? '',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,color: Colors.white),
         ),
-        SizedBox(height: 5),
+       const SizedBox(height: 5),
         SizedBox(
           width: 100,
-          child: Text(
-            member.position ?? '',
-            style: TextStyle(fontSize: 16),
+          child: Center(
+            child: Text(
+              member.position ?? '',
+              style: TextStyle(fontSize: 12,color: Colors.white),textAlign: TextAlign.center,
+            ),
           ),
         ),
+        Divider()
       ],
     );
   }

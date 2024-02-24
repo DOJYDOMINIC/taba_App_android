@@ -10,9 +10,7 @@ import 'package:taba_app_android/view/bottom_nav_bar.dart';
 import 'package:taba_app_android/view/login.dart';
 import 'constants/constants.dart';
 import 'controller/controllers.dart';
-import 'model/imagemodel.dart';
 
-var data;
 
 main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,19 +18,18 @@ main() async {
   await FirebaseApi().initNotifications();
   await Hive.initFlutter(); // Initialize Hive
   final SharedPreferences prefs = await SharedPreferences.getInstance();
-  data = prefs.get("regNo");
+ var data = prefs.get("regNo");
   Hive.openBox('data_box');
-  runApp(const MyApp());
+  runApp( MyApp(regNo:data));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
+  const MyApp({super.key,this.regNo});
+final regNo;
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        // ChangeNotifierProvider(create: (context) => PaginationData()),
         ChangeNotifierProvider(create: (context) => ControllerData()),
         ChangeNotifierProvider(create: (_) => MyPhoneDirectoryProvider()),
         ChangeNotifierProvider(create: (_) => UserDataProvider()),
@@ -49,13 +46,14 @@ class MyApp extends StatelessWidget {
               appBarTheme: const AppBarTheme(backgroundColor: Colors.black),
             ),
             // home: BottomNavigationPage(),
-            home: data != null ? BottomNavigationPage() : const Login(),
+            home: regNo != null ? BottomNavigationPage() : const Login(),
           ),
         ),
       ),
     );
   }
 }
+
 
 class MyAppLifecycleObserver extends WidgetsBindingObserver {
   @override

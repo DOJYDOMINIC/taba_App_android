@@ -3,8 +3,7 @@ import 'package:taba_app_android/view/notification.dart';
 import 'package:taba_app_android/view/paymentpage.dart';
 import 'package:taba_app_android/view/profile.dart';
 import '../widgets/appdrawer.dart';
-import 'dirpage2.dart';
-import 'dirpage3.dart';
+import 'dir_page.dart';
 
 
 class BottomNavigationPage extends StatefulWidget {
@@ -13,17 +12,17 @@ class BottomNavigationPage extends StatefulWidget {
 }
 
 class _BottomNavigationPageState extends State<BottomNavigationPage> {
-  int _currentIndex = 0;
 
+
+  int _currentIndex = 0;
   final List<Widget> _pages = [
     MyPhoneDirectoryPage(),
     PaymentPage(),
     ProfilePage()
-
   ];
-
   @override
   Widget build(BuildContext context) {
+    // int badgeCount = Provider.of<BadgeProvider>(context).notificationBadge;
     return Scaffold(
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white),
@@ -31,16 +30,21 @@ class _BottomNavigationPageState extends State<BottomNavigationPage> {
         actions: [
           IconButton(onPressed: (){
             Navigator.push(context, MaterialPageRoute(builder: (context) => NotificationPage(),));
-          }, icon: Icon(Icons.notifications_active,color: Colors.white,))
+          }, icon: Badge(
+            smallSize: 12,
+            backgroundColor: Colors.red,
+              isLabelVisible:false ,
+              child: Icon(Icons.notifications_active,color: Colors.white,)))
         ],
       ),
+
       drawer: AppDrawer(),
       body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         // elevation: 4,
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.grey.shade600,
-        backgroundColor: Colors.black.withOpacity(.9),
+        backgroundColor: Colors.black,
 
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -66,12 +70,3 @@ class _BottomNavigationPageState extends State<BottomNavigationPage> {
     );
   }
 }
-
-// class HomePage extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Center(
-//       child: Text('Home Page'),
-//     );
-//   }
-// }

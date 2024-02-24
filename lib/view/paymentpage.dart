@@ -29,7 +29,7 @@ class _PaymentPageState extends State<PaymentPage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Center(
-          child: SizedBox(
+          child:amountPaid == ""? CircularProgressIndicator(): SizedBox(
             width: width,
             child: Card(
               elevation: 8.0,

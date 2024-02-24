@@ -21,7 +21,6 @@ class _LoginState extends State<Login> {
   }
 
   bool _obscureText = true;
-
   TextEditingController userid = TextEditingController();
   TextEditingController password = TextEditingController();
 
@@ -150,7 +149,6 @@ class _LoginState extends State<Login> {
                                           BorderRadius.circular(18.0))),
                         ),
                         onPressed: () {
-
                           loginApi(context, userid.text, password.text);
                         },
                         child: const Text(

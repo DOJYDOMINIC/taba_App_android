@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../view/passwordreset.dart';
+
 void showPlatformDialog(BuildContext context, String text ) {
   if (Platform.isIOS) {
     // iOS dialog
@@ -15,6 +17,9 @@ void showPlatformDialog(BuildContext context, String text ) {
             CupertinoDialogAction(
               child: const Text('OK'),
               onPressed: () {
+                if(text == "please reset your password to continue"){
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PasswordResetPage(),));
+                }
                 Navigator.of(context).pop();
               },
             ),
@@ -34,7 +39,11 @@ void showPlatformDialog(BuildContext context, String text ) {
             TextButton(
               child: const Text('OK'),
               onPressed: () {
-                Navigator.of(context).pop();
+                if(text == "please reset your password to continue"){
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PasswordResetPage(),));
+                }else{
+                  Navigator.of(context).pop();
+                }
               },
             ),
           ],

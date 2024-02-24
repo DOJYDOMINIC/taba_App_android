@@ -13,6 +13,7 @@ class TextFieldOne extends StatefulWidget {
     this.preicon,
     this.keytype,
     this.fillcolor,
+    this.ontap,
     this.sufix,
     this.validator, required this.readonly,
   }) : super(key: key);
@@ -21,6 +22,7 @@ class TextFieldOne extends StatefulWidget {
   final bool readonly;
   final TextEditingController controller;
   final ValueChanged onchange;
+  final void Function()? ontap;
   final bool? obsecuretxt; // Note: Change type to bool?
   final IconData? preicon;
   final IconButton? sufix;
@@ -44,7 +46,7 @@ class _TextFieldOneState extends State<TextFieldOne> {
           readOnly:widget.readonly,
           keyboardType: widget.keytype,
           decoration: InputDecoration(
-            contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+            contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
             suffixIcon: widget.sufix,
             errorBorder: const OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(18)),
@@ -74,6 +76,7 @@ class _TextFieldOneState extends State<TextFieldOne> {
             color: Colors.white,
           ),
           validator: widget.validator,
+          onTap: widget.ontap,
           cursorColor: appcolor,
           obscureText: widget.obsecuretxt ?? false, // Use null-aware operator
           obscuringCharacter: '*',
