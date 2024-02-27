@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taba_app_android/constants/constants.dart';
 import '../view/aboutpage.dart';
 import '../view/bottom_nav_bar.dart';
 import '../view/login.dart';
+import '../view/passwordreset.dart';
 
 class AppDrawer extends StatelessWidget {
   @override
@@ -15,6 +17,7 @@ class AppDrawer extends StatelessWidget {
           FocusScope.of(context).unfocus();
         }
       },
+
       child: Drawer(
         width: width / 1.5,
         backgroundColor: Colors.black,
@@ -59,6 +62,22 @@ class AppDrawer extends StatelessWidget {
                   color: Colors.white, // Set the icon color to white
                 ),
               ),
+              // SizedBox(height: 100.sp,),
+              // ListTile(
+              //   title: Text('Reset Password', style: TextStyle(color: Colors.white)),
+              //   onTap: () {
+              //     Navigator.pop(context); // Close the drawer
+              //     Navigator.pushReplacement(
+              //       context,
+              //       MaterialPageRoute(builder: (context) => PasswordResetPage()),
+              //     );
+              //   },
+              //   leading: Icon(
+              //     Icons.refresh_sharp,
+              //     color: Colors.white, // Set the icon color to white
+              //   ),
+              // ),
+              SizedBox(height: MediaQuery.of(context).size.height-400,),
               ListTile(
                 title: Text('Logout', style: TextStyle(color: Colors.white)),
                 onTap: () async {

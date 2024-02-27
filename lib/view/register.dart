@@ -167,17 +167,6 @@ class _RegistrationState extends State<Registration> {
                         hinttext: "Enrollment date",
                         keytype: TextInputType.number,
                         controller: enrolldatecontroller,
-                        validator: (value) {
-                          if (value!.isEmpty) {
-                            return 'Enrollment date is required';
-                          }
-
-                          if (!isDateValid(value)) {
-                            return 'Invalid date format. Please enter a valid date (dd-MM-yyyy)';
-                          }
-
-                          return null; // Return null if the validation is successful
-                        },
                         onchange: (value) {
                           _enroll.currentState!.validate();
                           enrolldate = value;
@@ -340,7 +329,7 @@ class _RegistrationState extends State<Registration> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'Alredy have an account ? ',
+                          'Already have an account ? ',
                           style: TextStyle(
                             color: Colors.grey,
                             fontSize: 10.sp,

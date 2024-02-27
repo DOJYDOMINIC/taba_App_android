@@ -64,6 +64,7 @@ class ControllerData extends ChangeNotifier {
     notifyListeners();
   }
 
+
   // Getter and setter for password
   String get password => _password;
 
@@ -96,7 +97,7 @@ class MyPhoneDirectoryProvider extends ChangeNotifier {
 
   List<UserList> contacts = [];
   List<UserList> filteredContacts = [];
-  int currentPage = 0;
+  int currentPage = 1;
   bool isLoading = false;
   bool reachedEnd = false;
   bool isSearching = false;
@@ -233,7 +234,6 @@ class UserDataProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
-
 
 }
 

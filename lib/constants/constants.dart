@@ -8,8 +8,8 @@ const url = "https://aba.zenonsystems.com/api";
 
 
 const baseUrl = "$url/user";
-const adminBaseUrl = "http://$url/admin";
-const notificationUrl = "http://$url/notification";
+const adminBaseUrl = "$url/admin";
+const notificationUrl = "$url/notification";
 
 final box = Hive.box('data_box');
 

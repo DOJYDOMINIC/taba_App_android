@@ -5,10 +5,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import '../constants/constants.dart';
 import '../controller/controllers.dart';
-
 import '../model/userslist_model.dart';
 
+
 class MyPhoneDirectoryPage extends StatefulWidget {
+
   @override
   _MyPhoneDirectoryState createState() => _MyPhoneDirectoryState();
 }
@@ -24,7 +25,6 @@ class _MyPhoneDirectoryState extends State<MyPhoneDirectoryPage> {
     context.read<UserDataProvider>().fetchUserData();
     context.read<MyPhoneDirectoryProvider>().fetchData();
   }
-
 
 
   @override
@@ -75,9 +75,7 @@ class _MyPhoneDirectoryState extends State<MyPhoneDirectoryPage> {
                       onChanged: (value) {
                         if (value.isEmpty) {
                           phoneDirProvider.isSearching = false;
-                          context
-                              .read<MyPhoneDirectoryProvider>()
-                              .clearSearch();
+                          context.read<MyPhoneDirectoryProvider>().clearSearch();
                         } else {
                           phoneDirProvider.isSearching = true;
                           phoneDirProvider.searchData(value);
@@ -91,10 +89,7 @@ class _MyPhoneDirectoryState extends State<MyPhoneDirectoryPage> {
                         ? Center(child: CircularProgressIndicator())
                         : NotificationListener<ScrollNotification>(
                             onNotification: (ScrollNotification scrollInfo) {
-                              if (!phoneDirProvider.isLoading &&
-                                  scrollInfo.metrics.pixels ==
-                                      scrollInfo.metrics.maxScrollExtent &&
-                                  !phoneDirProvider.reachedEnd) {
+                              if (!phoneDirProvider.isLoading && scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent && !phoneDirProvider.reachedEnd) {
                                 phoneDirProvider.fetchData();
                               }
                               return true;
@@ -105,8 +100,7 @@ class _MyPhoneDirectoryState extends State<MyPhoneDirectoryPage> {
                                 context.read<MyPhoneDirectoryProvider>().fetchData();
                               },
                               child: ListView.builder(
-                                itemCount: phoneDirProvider.filteredContacts.length +
-                                        (phoneDirProvider.reachedEnd ? 0 : 1),
+                                itemCount: phoneDirProvider.filteredContacts.length + (phoneDirProvider.reachedEnd ? 0 : 1),
                                 itemBuilder: (context, index) {
                                   if (index < phoneDirProvider.filteredContacts.length) {
                                     return _buildContactItem(phoneDirProvider.filteredContacts[index]);

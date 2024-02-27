@@ -34,11 +34,11 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
-    context.read<UserDataProvider>().fetchUserData();
     fetchData();
     whatsappNumber();
     welfare();
-
+    nameEdit();
+    // context.read<UserDataProvider>().fetchUserData();
     // dataMaster();
   }
 
@@ -50,7 +50,6 @@ class _ProfilePageState extends State<ProfilePage> {
   fetchData() async {
     try {
       result = box.get(0);
-
       if(result != null){
         userData = User.fromJson(result);
       }
@@ -203,10 +202,15 @@ class _ProfilePageState extends State<ProfilePage> {
         await imageFile.writeAsBytes(imageBytes);
         return imageFile;
       }
-
-      String base64String = result["image"]; // Your base64 string
-      File decodedImage = await base64ToImage(base64String);
-      _image = decodedImage;
+if(result["image"] != null){
+  String base64String = result["image"]; // Your base64 string
+  File decodedImage = await base64ToImage(base64String);
+  _image = decodedImage;
+}else{
+  String base64String = defaultImage; // Your base64 string
+  File decodedImage = await base64ToImage(base64String);
+  _image = decodedImage;
+}
     }
 
     // Convert User object to a map
@@ -228,24 +232,25 @@ class _ProfilePageState extends State<ProfilePage> {
     request.files.add(imageFile);
 
     // Print out the data being sent to the API
-    print('PUT Request Data:');
-    print('URL: ${request.url}');
-    print('Fields:');
-    request.fields.forEach((key, value) {
-      print('$key: $value');
-    });
-    print('Files:');
-    request.files.forEach((file) {
-      print('Field name: ${file.field}');
-      print('File name: ${file.filename}');
-      print('Content type: ${file.contentType}');
-      print('File length: ${file.length}');
-    });
+    // print('PUT Request Data:');
+    // print('URL: ${request.url}');
+    // print('Fields:');
+    // request.fields.forEach((key, value) {
+    //   print('$key: $value');
+    // });
+    // print('Files:');
+    // request.files.forEach((file) {
+    //   print('Field name: ${file.field}');
+    //   print('File name: ${file.filename}');
+    //   print('Content type: ${file.contentType}');
+    //   print('File length: ${file.length}');
+    // });
 
     // Send the request
     try {
       var response = await request.send();
       if (response.statusCode == 200) {
+        print(response.toString());
         print('Request sent successfully');
       } else {
         print('Failed to send request. Status code: ${response.statusCode}');
@@ -279,7 +284,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     // Create a temporary file and write the compressed bytes to it
     File compressedFile =
-        File('${Directory.systemTemp.path}/compressed_image.jpg');
+    File('${Directory.systemTemp.path}/compressed_image.jpg');
     compressedFile.writeAsBytesSync(compressedBytes);
     return compressedFile;
   }
@@ -299,6 +304,19 @@ class _ProfilePageState extends State<ProfilePage> {
       }
       setState(() {});
     }
+  }
+
+  bool _nameedit = false;
+
+  nameEdit(){
+
+    if(userData?.firstName != null){
+      _nameedit = true;
+    }else{
+      _nameedit = false;
+    }
+    setState(() {
+    });
   }
 
   bool _welfare = false;
@@ -357,7 +375,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _pickImageFromGallery() async {
     final pickedFile =
-        await _picker.pickImage(source: ImageSource.gallery, imageQuality: 15);
+    await _picker.pickImage(source: ImageSource.gallery, imageQuality: 15);
     if (pickedFile != null) {
       _image = File(pickedFile.path);
     }
@@ -366,43 +384,44 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _pickImageFromCamera() async {
     final pickedFile =
-        await _picker.pickImage(source: ImageSource.camera, imageQuality: 15);
+    await _picker.pickImage(source: ImageSource.camera, imageQuality: 15);
     if (pickedFile != null) {
       _image = File(pickedFile.path);
     }
     setState(() {});
   }
 
+
   late TextEditingController _firstname =
-      TextEditingController(text: userData?.firstName ?? "");
+  TextEditingController(text: userData?.firstName ?? "");
   late TextEditingController _lastname =
-      TextEditingController(text: userData?.lastName ?? "");
+  TextEditingController(text: userData?.lastName ?? "");
   late TextEditingController _phone =
-      TextEditingController(text: userData?.phone ?? "");
+  TextEditingController(text: userData?.phone ?? "");
   late TextEditingController _whatsapp =
-      TextEditingController(text: userData?.whatsAppno ?? "");
+  TextEditingController(text: userData?.whatsAppno ?? "");
   late TextEditingController _address =
-      TextEditingController(text: userData?.address ?? "");
+  TextEditingController(text: userData?.address ?? "");
   late TextEditingController _officeaddress =
-      TextEditingController(text: userData?.officeAddress ?? "");
+  TextEditingController(text: userData?.officeAddress ?? "");
   late TextEditingController _email =
-      TextEditingController(text: userData?.email ?? "");
+  TextEditingController(text: userData?.email ?? "");
   late TextEditingController _pincode =
-      TextEditingController(text: userData?.pincode ?? "");
+  TextEditingController(text: userData?.pincode ?? "");
   late TextEditingController _state =
-      TextEditingController(text: userData?.state ?? "");
+  TextEditingController(text: userData?.state ?? "");
   late TextEditingController _district =
-      TextEditingController(text: userData?.district);
+  TextEditingController(text: userData?.district);
   late TextEditingController _dob =
-      TextEditingController(text: userData?.dob ?? "");
+  TextEditingController(text: userData?.dob ?? "");
   late TextEditingController _clerkname1 =
-      TextEditingController(text: userData?.clerkName1);
+  TextEditingController(text: userData?.clerkName1);
   late TextEditingController _clerkphone1 =
-      TextEditingController(text: userData?.clerkPhone1);
+  TextEditingController(text: userData?.clerkPhone1);
   late TextEditingController _clerkname2 =
-      TextEditingController(text: userData?.clerkName2);
+  TextEditingController(text: userData?.clerkName2);
   late TextEditingController _clerkphone2 =
-      TextEditingController(text: userData?.clerkPhone2);
+  TextEditingController(text: userData?.clerkPhone2);
 
   bool isPressed = false;
 
@@ -471,12 +490,12 @@ class _ProfilePageState extends State<ProfilePage> {
                                     radius: 50.sp,
                                     backgroundImage: _image?.path == null
                                         ? MemoryImage(
-                                            base64Decode(userData?.image),
-                                          )
+                                      base64Decode(userData?.image),
+                                    )
                                         : Image.file(File(_image!.path)).image
-                                    // const AssetImage(
-                                    //             "assets/images/man.png") as ImageProvider<Object>?
-                                    ),
+                                  // const AssetImage(
+                                  //             "assets/images/man.png") as ImageProvider<Object>?
+                                ),
                               ),
                             if (userData?.image == null)
                               CircleAvatar(
@@ -487,8 +506,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                   radius: 50.sp,
                                   backgroundImage: _image?.path == null
                                       ? const AssetImage(
-                                              "assets/images/man.png")
-                                          as ImageProvider<Object>?
+                                      "assets/images/man.png")
+                                  as ImageProvider<Object>?
                                       : Image.file(File(_image!.path)).image,
                                 ),
                               ),
@@ -517,12 +536,11 @@ class _ProfilePageState extends State<ProfilePage> {
                               height: height * .02,
                             ),
                             TextFieldOne(
-                              readonly: false,
+                              readonly: _nameedit,
                               controller: _firstname,
                               hinttext: "Name",
                               onchange: (val) {
                                 userData?.firstName = val;
-
                                 print(_firstname.text);
                               },
                               obsecuretxt: false,
@@ -575,7 +593,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   }),
                             TextFieldOne(
                               readonly: true,
-                              ontap: ()async{
+                              ontap:_nameedit != true ? ()async{
                                 var datePicked = await DatePicker.showSimpleDatePicker(context, firstDate: DateTime(1900), dateFormat: "dd-MM-yyyy", locale: DateTimePickerLocale.en_us, looping: true,);
                                 if (datePicked != null) {
                                   // print(datePicked.toString());
@@ -584,7 +602,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   userData?.dob = enrollDate.toString();
                                   setState(() {});
                                 }
-                              },
+                              }: (){},
                               hinttext: "DOB",
                               keytype: TextInputType.number,
                               controller: _dob,
@@ -605,7 +623,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               },
                               obsecuretxt: false,
                               sufix: IconButton(
-                                onPressed: () async {
+                                onPressed:_nameedit != true ? () async {
                                   var datePicked = await DatePicker.showSimpleDatePicker(context, firstDate: DateTime(1900), dateFormat: "dd-MM-yyyy", locale: DateTimePickerLocale.en_us, looping: true,);
                                   if (datePicked != null) {
                                     // print(datePicked.toString());
@@ -614,7 +632,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     userData?.dob = enrollDate.toString();
                                     setState(() {});
                                   }
-                                },
+                                }:(){},
                                 icon: Icon(
                                   Icons.calendar_month,
                                   color: Colors.grey,
@@ -635,7 +653,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               height: 120,
                               decoration: BoxDecoration(
                                   border:
-                                      Border.all(color: Colors.grey.shade600),
+                                  Border.all(color: Colors.grey.shade600),
                                   borderRadius: BorderRadius.circular(20)),
                               padding: const EdgeInsets.only(left: 10),
                               child: Padding(
@@ -648,7 +666,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   decoration: InputDecoration(
                                     hintText: "address",
                                     hintStyle:
-                                        const TextStyle(color: Colors.grey),
+                                    const TextStyle(color: Colors.grey),
                                     border: InputBorder.none,
                                     focusedBorder: InputBorder.none,
                                     enabledBorder: InputBorder.none,
@@ -671,7 +689,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               height: 120,
                               decoration: BoxDecoration(
                                   border:
-                                      Border.all(color: Colors.grey.shade600),
+                                  Border.all(color: Colors.grey.shade600),
                                   borderRadius: BorderRadius.circular(20)),
                               padding: const EdgeInsets.only(left: 10),
                               child: TextField(
@@ -751,7 +769,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                       borderRadius: BorderRadius.circular(18)),
                                   child: Padding(
                                     padding:
-                                        const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                    const EdgeInsets.fromLTRB(10, 0, 10, 0),
                                     child: DropdownButton<String>(
                                       hint: Text(
                                         bloodGroup,
@@ -778,16 +796,16 @@ class _ProfilePageState extends State<ProfilePage> {
                                         'O-',
                                         "N/A",
                                       ].map<DropdownMenuItem<String>>(
-                                          (String value) {
-                                        return DropdownMenuItem<String>(
-                                          value: value,
-                                          child: Text(
-                                            value,
-                                            style:
+                                              (String value) {
+                                            return DropdownMenuItem<String>(
+                                              value: value,
+                                              child: Text(
+                                                value,
+                                                style:
                                                 TextStyle(color: Colors.grey),
-                                          ),
-                                        );
-                                      }).toList(),
+                                              ),
+                                            );
+                                          }).toList(),
                                     ),
                                   ),
                                 ),
@@ -847,10 +865,10 @@ class _ProfilePageState extends State<ProfilePage> {
                               height: 60,
                               child: ElevatedButton(
                                   onPressed: () async {
-                                    final SharedPreferences prefs =
-                                        await SharedPreferences.getInstance();
+                                    final SharedPreferences prefs = await SharedPreferences.getInstance();
                                     var regNo = prefs.getString("regNo");
-                                    addData();
+                                    await addData();
+                                    await context.read<UserDataProvider>().fetchUserData();
                                     Navigator.pushReplacement(
                                         context,
                                         MaterialPageRoute(

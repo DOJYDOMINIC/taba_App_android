@@ -14,13 +14,14 @@ void showPlatformDialog(BuildContext context, String text ) {
           title: const Text('Alert'),
           content: Text(text),
           actions: [
-            CupertinoDialogAction(
+            TextButton(
               child: const Text('OK'),
               onPressed: () {
                 if(text == "please reset your password to continue"){
                   Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PasswordResetPage(),));
+                }else{
+                  Navigator.of(context).pop();
                 }
-                Navigator.of(context).pop();
               },
             ),
           ],

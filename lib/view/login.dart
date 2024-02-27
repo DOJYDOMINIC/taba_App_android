@@ -1,15 +1,20 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:taba_app_android/view/passwordreset.dart';
 import 'package:taba_app_android/view/register.dart';
+import '../constants/constants.dart';
 import '../controller/controllers.dart';
+import '../services/firebase_notification.dart';
 import '../services/login_api.dart';
 import '../widgets/text_field.dart';
-
+import 'package:http/http.dart' as http;
 
 class Login extends StatefulWidget {
-  const Login({Key? key}) : super(key: key);
-
+  const Login({Key? key, this.data}) : super(key: key);
+final data;
   @override
   State<Login> createState() => _LoginState();
 }
@@ -18,6 +23,38 @@ class _LoginState extends State<Login> {
   @override
   void initState() {
     super.initState();
+    FirebaseApi();
+  }
+
+  var name;
+
+  Future<void> fetchName(String userid) async {
+    try {
+      final response = await http.post(
+        Uri.parse("$baseUrl/get_by_regno"),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(
+          {
+            "regNo": userid,
+          },
+        ),
+      );
+      name = "";
+      setState(() {
+      });
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        name = data[0]["firstName"];
+        print(data[0]["firstName"]);
+        setState(() {});
+      } else {
+        print(response.body.toString());
+      }
+    } catch (e) {
+      print("Exception during API call: $e");
+    }
   }
 
   bool _obscureText = true;
@@ -26,7 +63,16 @@ class _LoginState extends State<Login> {
 
   final _userIdFormKey = GlobalKey<FormState>();
   final _passwordFormKey = GlobalKey<FormState>();
+
   // final focusNode = FocusNode();
+
+  String? validateString(String value) {
+    final RegExp regex = RegExp(r'^K\/\d+\/\d{4}$');
+    if (!regex.hasMatch(value)) {
+      return 'Invalid format. Format should be like "K/333/2008"';
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,6 +132,10 @@ class _LoginState extends State<Login> {
                   ),
                 ],
               ),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                  child: Text("${name?? ""}",style: TextStyle(color: Colors.white),overflow:TextOverflow.ellipsis,)),
+              SizedBox(height: 10,),
               Padding(
                 padding: const EdgeInsets.only(left: 20, right: 20),
                 child: Column(
@@ -96,7 +146,20 @@ class _LoginState extends State<Login> {
                         readonly: false,
                         hinttext: "Reg ID",
                         controller: userid,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Reg ID is required';
+                          }
+                          // Define your regular expression pattern
+                          final RegExp regex = RegExp(r'^K\/\d+\/\d{4}$');
+                          // Check if the input value matches the pattern
+                          if (!regex.hasMatch(value)) {
+                            return 'Invalid format. Format should be like "K/333/2008"';
+                          }
+                          return null; // Return null if the input is valid
+                        },
                         onchange: (value) {
+                          fetchName(userid.text);
                           _userIdFormKey.currentState!.validate();
                           pro.userid = value;
                           // debugPrint(userid.text);
@@ -110,6 +173,15 @@ class _LoginState extends State<Login> {
                     Form(
                       key: _passwordFormKey,
                       child: TextFieldOne(
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Password is required';
+                          }
+                          if (value.length < 6) {
+                            return 'Password must be at least 6 characters long';
+                          }
+                          return null; // Return null if the input is valid
+                        },
                         readonly: false,
                         hinttext: "Password",
                         controller: password,
@@ -148,8 +220,12 @@ class _LoginState extends State<Login> {
                                       borderRadius:
                                           BorderRadius.circular(18.0))),
                         ),
-                        onPressed: () {
-                          loginApi(context, userid.text, password.text);
+                        onPressed: () async{
+                          if (_userIdFormKey.currentState!.validate() &&
+                              _passwordFormKey.currentState!.validate()) {
+                            // If the form is valid, call the loginApi function
+                           await loginApi(context, userid.text, password.text);
+                          }
                         },
                         child: const Text(
                           "Login",
@@ -162,14 +238,24 @@ class _LoginState extends State<Login> {
                       ),
                     ),
                     SizedBox(
-                      height: width * .15,
+                      height: width * .10,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                          TextButton(onPressed: (){
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => PasswordResetPage(),));
-                          }, child: Text("ForgotPassword",style: TextStyle(color: Colors.white,fontSize: 10),)),
+                        TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => PasswordResetPage(),
+                                  ));
+                            },
+                            child: Text(
+                              "ForgotPassword",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 10),
+                            )),
                         Text(
                           'Don’t have an account ? ',
                           style: TextStyle(
@@ -186,7 +272,9 @@ class _LoginState extends State<Login> {
                               ),
                             );
                           },
-                          child: Text("SignUp",style: TextStyle(color: Colors.white,fontSize: 10)),
+                          child: Text("SignUp",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 10)),
                         ),
                       ],
                     ),

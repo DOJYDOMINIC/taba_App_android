@@ -8,7 +8,6 @@ import '../constants/constants.dart';
 import 'bottom_nav_bar.dart';
 import 'package:http/http.dart' as http;
 
-
 class NotificationPage extends StatefulWidget {
   const NotificationPage({Key? key}) : super(key: key);
 
@@ -58,9 +57,17 @@ class _NotificationPageState extends State<NotificationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(onPressed: (){
-        _launchURL();
-      },child: Icon(Icons.share,color:Colors.black,),backgroundColor: Colors.white,),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _launchURL();
+        },
+        child: Image.asset(
+        'assets/images/whp.jpeg',
+        width: 50.sp, // Adjust width as needed
+        height: 50.sp, // Adjust height as needed
+      ),
+        backgroundColor:Colors.white,
+      ),
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
@@ -87,7 +94,9 @@ class _NotificationPageState extends State<NotificationPage> {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else {
             List<Map<String, dynamic>> notifications = snapshot.data!;
-            return ListView.builder(reverse: true,
+            // Reverse the list here
+            notifications = notifications.reversed.toList();
+            return ListView.builder(
               itemCount: notifications.length,
               itemBuilder: (context, index) => Padding(
                 padding: const EdgeInsets.only(bottom: 5, left: 10, right: 10),
@@ -138,6 +147,7 @@ class _NotificationPageState extends State<NotificationPage> {
       ),
     );
   }
+
   _launchURL() async {
     final Uri url = Uri.parse('https://chat.whatsapp.com/IufAfSK4PhvJKiKiQ3Cn12');
     if (!await launchUrl(url)) {

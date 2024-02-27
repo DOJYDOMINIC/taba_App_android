@@ -98,7 +98,7 @@ class _AboutPageState extends State<AboutPage> {
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: SafeArea(
-            child:data == null ? Center(child: CircularProgressIndicator()): Column(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Column(
@@ -108,9 +108,12 @@ class _AboutPageState extends State<AboutPage> {
                     _buildMemberWidget(librarian),
                   ],
                 ),
-                Text(
-                  'Executive Members',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,color: Colors.white,),
+                Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    'Executive Members',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,color: Colors.white,),
+                  ),
                 ),
                const SizedBox(height: 30),
                 SingleChildScrollView(

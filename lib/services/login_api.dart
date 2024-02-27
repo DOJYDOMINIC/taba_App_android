@@ -6,8 +6,13 @@ import 'package:taba_app_android/constants/constants.dart';
 import '../view/bottom_nav_bar.dart';
 import '../widgets/dialog.dart';
 import 'package:http/http.dart' show ClientException;
+import 'firebase_notification.dart';
 
 Future<void> loginApi(BuildContext context, String regNo, String pass) async {
+  FirebaseApi();
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  var fCMToken = prefs.getString("fCMToken");
+
   print("api called");
 
   try {
@@ -20,47 +25,40 @@ Future<void> loginApi(BuildContext context, String regNo, String pass) async {
         "password": pass,
       }),
     );
+
     var data = jsonDecode(response.body);
 
     if (response.statusCode == 200) {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var fCMToken = prefs.getString("fCMToken");
+      debugPrint(data.toString());
+      var userData = data["user"];
+      var regNo = userData["regNo"];
+      var id = userData["_id"];
+      prefs.setString("regNo", regNo);
+      prefs.setString("id", id);
       if (fCMToken != null) {
-        var data = jsonDecode(response.body);
-        var regNo = data["user"]["regNo"];
-        var id = data["user"]["_id"];
-        prefs.setString("regNo", regNo);
-        prefs.setString("id", id);
-        // Assuming notificationPost and showPlatformDialog are defined elsewhere
-        notificationPost(fCMToken,context);
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                BottomNavigationPage(), // Replace with the appropriate destination page
-          ),
-        );
-      }// Show appropriate error message
+        notificationPost(fCMToken, context);
+      }
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => BottomNavigationPage(),
+        ),
+      );
     } else {
-      if(response.statusCode == 401){
+      if (response.statusCode == 401) {
         showPlatformDialog(context, data["message"]);
-      }else if(response.statusCode == 403){
-        showPlatformDialog(context, data["message"]); // Show error message from the API response
-      }else{
-        showPlatformDialog(context, data["message"]); // Show error message from the API response
+      } else if (response.statusCode == 403) {
+        showPlatformDialog(context, data["message"]);
+      } else {
+        showPlatformDialog(context, data["message"]);
       }
     }
   } on http.ClientException catch (_) {
-    showPlatformDialog(
-        context, "Something went wrong"); // Show a generic error message
+    showPlatformDialog(context, "Error");
   } catch (e) {
-    debugPrint("Exception during API call: $e");
-    showPlatformDialog(
-        context, "Something went wrong"); // Show a generic error message
+    showPlatformDialog(context, "Something went wrong");
   }
 }
-
-
 
 
 
