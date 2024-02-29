@@ -86,8 +86,8 @@ class ControllerData extends ChangeNotifier {
   List<UserList> get usersLists => _usersList;
 
   void updateUsersList(List<UserList> newList) {
-  _usersList.addAll(newList);
-  notifyListeners();
+    _usersList.addAll(newList);
+    notifyListeners();
   }
 
 }

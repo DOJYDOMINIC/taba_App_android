@@ -18,32 +18,7 @@ class Registration extends StatefulWidget {
 }
 
 class _RegistrationState extends State<Registration> {
-  @override
-  void initState() {
-    super.initState();
-    fetchData();
-  }
-
-  final _enroll = GlobalKey<FormState>();
-
-  bool isDateValid(String date) {
-    try {
-      DateTime parsedDate = DateFormat('dd-MM-yyyy').parseStrict(date);
-      return parsedDate != null;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  var datas;
-  String enrolldate = "";
-  bool _obscurepassword = true;
-  bool _obscureconfirmpassword = true;
-
-  final useridkey = GlobalKey<FormState>();
-  final phonekey = GlobalKey<FormState>();
-  final passwordkey = GlobalKey<FormState>();
-  final confirmpasswordkey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
 
   TextEditingController regNumber = TextEditingController();
   TextEditingController password = TextEditingController();
@@ -53,16 +28,24 @@ class _RegistrationState extends State<Registration> {
   String? _regNo;
   String? _password;
   String? _confirmpassword;
+  String? enrolldate;
+
+  bool _obscurepassword = true;
+  bool _obscureconfirmpassword = true;
 
   User? userData;
 
-  fetchData() {
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+  fetchData() async {
     try {
-      // Your asynchronous code, e.g., making an HTTP request
       Map<String, dynamic> result = box.get(0);
       userData = User.fromJson(result);
       print(userData?.firstName);
-      // addData();
     } catch (error) {
       debugPrint("Hive: $error");
     }
@@ -70,10 +53,7 @@ class _RegistrationState extends State<Registration> {
 
   @override
   Widget build(BuildContext context) {
-    var width = MediaQuery.of(context).size.width;
     var height = MediaQuery.of(context).size.height;
-
-    // double top = MediaQuery.of(context).padding.top;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -125,26 +105,40 @@ class _RegistrationState extends State<Registration> {
               ),
               Padding(
                 padding: const EdgeInsets.only(left: 20, right: 20),
-                child: Column(
-                  children: [
-                    TextFieldOne(
-                      hinttext: "Reg No",
-                      controller: regNumber,
-                      onchange: (value) {
-                        setState(() {
-                          _regNo = value;
-                          userData?.regNo = value;
-                          // debugPrint(_phoneNumber);
-                        });
-                      },
-                      obsecuretxt: false,
-                      readonly: false,
-                    ),
-                    Form(
-                      key: _enroll,
-                      child: TextFieldOne(
-                        ontap: ()async{
-                          // _enroll.currentState!.validate();
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      TextFieldOne(
+                        hinttext: "Reg No",
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Reg ID is required';
+                          }
+                          final RegExp regex = RegExp(r'^K\/\d+\/\d{4}$');
+                          if (!regex.hasMatch(value)) {
+                            return 'Invalid format. Format like "K/000/2008"';
+                          }
+                          return null;
+                        },
+                        controller: regNumber,
+                        onchange: (value) {
+                          setState(() {
+                            _regNo = value;
+                            userData?.regNo = value;
+                          });
+                        },
+                        obsecuretxt: false,
+                        readonly: false,
+                      ),
+                      TextFieldOne(
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Enrollment date is empty.';
+                          }
+                          return null;
+                        },
+                        ontap: () async {
                           var datePicked =
                           await DatePicker.showSimpleDatePicker(
                             context,
@@ -153,49 +147,40 @@ class _RegistrationState extends State<Registration> {
                             dateFormat: "dd/MM/yyyy",
                             locale: DateTimePickerLocale.en_us,
                             looping: true,
-                            // pickerMode: DateTimePickerMode.date
                           );
                           if (datePicked != null) {
-                            _enroll.currentState!.validate();
-                            enrolldate = DateFormat('dd/MM/yyyy').format(datePicked);
-                            enrolldatecontroller.text = enrolldate;
-                            userData?.enrollmentDate = enrolldate;
+                            enrolldate =
+                                DateFormat('dd/MM/yyyy').format(datePicked);
+                            enrolldatecontroller.text = enrolldate!;
+                            userData?.enrollmentDate = enrolldate!;
                             setState(() {});
                           }
-                          setState(() {});
                         },
                         hinttext: "Enrollment date",
                         keytype: TextInputType.number,
                         controller: enrolldatecontroller,
                         onchange: (value) {
-                          _enroll.currentState!.validate();
                           enrolldate = value;
                           userData?.enrollmentDate = value;
-
-                          // setState(() {});
                         },
                         obsecuretxt: false,
                         sufix: IconButton(
                           onPressed: () async {
-                            _enroll.currentState!.validate();
                             var datePicked =
-                                await DatePicker.showSimpleDatePicker(
+                            await DatePicker.showSimpleDatePicker(
                               context,
                               firstDate: DateTime(1900),
                               dateFormat: "dd/MM/yyyy",
                               locale: DateTimePickerLocale.en_us,
                               looping: true,
-
-                              // pickerMode: DateTimePickerMode.date
                             );
                             if (datePicked != null) {
-                              _enroll.currentState!.validate();
-                              enrolldate = DateFormat('dd/MM/yyyy').format(datePicked);
-                              enrolldatecontroller.text = enrolldate;
-                              userData?.enrollmentDate = enrolldate;
+                              enrolldate =
+                                  DateFormat('dd/MM/yyyy').format(datePicked);
+                              enrolldatecontroller.text = enrolldate!;
+                              userData?.enrollmentDate = enrolldate!;
                               setState(() {});
                             }
-                            setState(() {});
                           },
                           icon: Icon(
                             Icons.calendar_month,
@@ -204,155 +189,158 @@ class _RegistrationState extends State<Registration> {
                         ),
                         readonly: true,
                       ),
-                    ),
-                    TextFieldOne(
-                      hinttext: "Password",
-                      controller: password,
-                      onchange: (value) {
-                        setState(() {
-                          _password = value;
-                          // debugPrint(_phoneNumber);
-                        });
-                      },
-                      validator: (value) {},
-                      obsecuretxt: _obscurepassword,
-                      sufix: IconButton(
-                        icon: Icon(
-                          _obscurepassword
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                          color: Colors.grey,
-                        ),
-                        onPressed: () {
+                      TextFieldOne(
+                        hinttext: "Password",
+                        controller: password,
+                        onchange: (value) {
                           setState(() {
-                            _obscurepassword = !_obscurepassword;
+                            _password = value;
                           });
                         },
-                      ),
-                      readonly: false,
-                    ),
-                    TextFieldOne(
-                      hinttext: "Confirm Password",
-                      readonly: false,
-                      controller: confirmpassword,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'confirm password is empty.';
-                        }
-                        return null;
-                      },
-                      onchange: (value) {
-                        setState(() {
-                          _confirmpassword = value;
-                        });
-                      },
-                      obsecuretxt: _obscureconfirmpassword,
-                      sufix: IconButton(
-                        icon: Icon(
-                          _obscureconfirmpassword
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                          color: Colors.grey,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscureconfirmpassword = !_obscureconfirmpassword;
-                          });
-                        },
-                      ),
-                    ),
-                    SizedBox(
-                      height: height * .03,
-                    ),
-                    SizedBox(
-                      height: 50.h,
-                      width: height,
-                      child: ElevatedButton(
-                        style: ButtonStyle(
-                          shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
-                                  RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(18.0))),
-                          backgroundColor:
-                              MaterialStateProperty.all(Colors.white),
-                        ),
-                        onPressed: () async {
-                          final SharedPreferences prefs =
-                              await SharedPreferences.getInstance();
-                          var regNo = prefs.getString("regNo");
-                          prefs.clear();
-                          if (regNo == null) {
-                            box.clear();
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Password is empty.';
                           }
-                          Map<String, dynamic> collectedData = {
-                            "regNo": regNumber.text,
-                            "password": password.text,
-                            "enrollmentDate": enrolldatecontroller.text,
-                          };
-
-                          // print(collectedData["regNo"]);
-
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    ProfilePage(item: collectedData),
-                              ));
-
-                          // Navigator.push(
-                          //     context,
-                          //     MaterialPageRoute(
-                          //       builder: (context) => ProfilePage(),
-                          //     ));
-                          // if (useridkey.currentState!.validate() ||
-                          //     phonekey.currentState!.validate() ||
-                          //     passwordkey.currentState!.validate() ||
-                          //     confirmpasswordkey.currentState!.validate()) {
-                          // verifyOtp(phoneNumber!);
-                          // UploadImage();
+                          if (password.text.length < 6 ) {
+                            return 'Password must be at least 6 characters.';
+                          }
+                          return null;
                         },
-                        child: const Text(
-                          "Sign Up",
-                          style: TextStyle(
-                            fontWeight: FontWeight.w900,
-                            color: Colors.black,
-                            fontSize: 20,
+                        obsecuretxt: _obscurepassword,
+                        sufix: IconButton(
+                          icon: Icon(
+                            _obscurepassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: Colors.grey,
                           ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurepassword = !_obscurepassword;
+                            });
+                          },
+                        ),
+                        readonly: false,
+                      ),
+                      TextFieldOne(
+                        hinttext: "Confirm Password",
+                        readonly: false,
+                        controller: confirmpassword,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Confirm password is empty.';
+                          }
+                          if (_password != value) {
+                            return "Passwords don't match";
+                          }
+                          return null;
+                        },
+                        onchange: (value) {
+                          setState(() {
+                            _confirmpassword = value;
+                          });
+                        },
+                        obsecuretxt: _obscureconfirmpassword,
+                        sufix: IconButton(
+                          icon: Icon(
+                            _obscureconfirmpassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: Colors.grey,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscureconfirmpassword =
+                              !_obscureconfirmpassword;
+                            });
+                          },
                         ),
                       ),
-                    ),
-                    SizedBox(
-                      height: height * .02,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Already have an account ? ',
-                          style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 10.sp,
+                      SizedBox(
+                        height: height * .03,
+                      ),
+                      SizedBox(
+                        height: 50.h,
+                        width: height,
+                        child: ElevatedButton(
+                          style: ButtonStyle(
+                            shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18.0),
+                              ),
+                            ),
+                            backgroundColor:
+                            MaterialStateProperty.all(Colors.white),
                           ),
-                        ),
-                        TextButton(
                           onPressed: () async {
-                            Navigator.pushReplacement(
+                            if (_formKey.currentState!.validate()) {
+                              final SharedPreferences prefs =
+                              await SharedPreferences.getInstance();
+                              var regNo = prefs.getString("regNo");
+                              prefs.clear();
+                              if (regNo == null) {
+                                box.clear();
+                              }
+                              Map<String, dynamic> collectedData = {
+                                "regNo": _regNo,
+                                "password": password.text,
+                                "enrollmentDate": enrolldatecontroller.text,
+                              };
+                              print(collectedData.toString());
+                              Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => Login()));
+                                  builder: (context) =>
+                                      ProfilePage(item: collectedData),
+                                ),
+                              );
+                            }
                           },
-                          child: Text(
-                            "Login",
+                          child: const Text(
+                            "Sign Up",
                             style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.black,
+                              fontSize: 20,
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                  ],
+                      ),
+                      SizedBox(
+                        height: height * .02,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Already have an account ? ',
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 10.sp,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => Login(),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              "Login",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12.sp,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

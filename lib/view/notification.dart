@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:readmore/readmore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -61,12 +62,21 @@ class _NotificationPageState extends State<NotificationPage> {
         onPressed: () {
           _launchURL();
         },
-        child: Image.asset(
-        'assets/images/whp.jpeg',
-        width: 50.sp, // Adjust width as needed
-        height: 50.sp, // Adjust height as needed
-      ),
-        backgroundColor:Colors.white,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Text("Official",
+            //     style: TextStyle(fontSize: 6.sp, fontWeight: FontWeight.bold)),
+            Image.asset(
+              'assets/images/whatsapp.png',
+              width: 30.sp, // Adjust width as needed
+              height: 30.sp, // Adjust height as needed
+            ),
+            // Text("Group",
+            //     style: TextStyle(fontSize: 6.sp, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        backgroundColor: Colors.white,
       ),
       appBar: AppBar(
         leading: IconButton(
@@ -105,38 +115,46 @@ class _NotificationPageState extends State<NotificationPage> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   color: Colors.grey.shade900,
-                  child: ListTile(
-                    title: SelectableText(
-                      notifications[index]["title"].toString(),
-                      // toolbarOptions: ToolbarOptions(copy: true),
-                      showCursor: true,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        height: 1.6.h,
+                  child: GestureDetector(
+                    onTap: () {
+                      Clipboard.setData(ClipboardData(text: "${notifications[index]["title"].toString()}\n${notifications[index]["body"].toString()}"));
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(duration: Duration(milliseconds:500 ),content: Text("Copied"),backgroundColor: Colors.green,));
+                    },
+                    child: ListTile(
+                      title: Text(
+                        notifications[index]["title"].toString(),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          height: 1.6.h,
+                        ),
                       ),
-                    ),
-                    subtitle: ReadMoreText(
-                      notifications[index]["body"].toString(),
-                      style: TextStyle(
-                        color: Color(0xFF9B9B9B),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        height: 1.6.h,
-                      ),
-                      trimLines: 2,
-                      colorClickableText: Color(0xFFC67C4E),
-                      trimMode: TrimMode.Line,
-                      trimLength: 10,
-                      trimCollapsedText: 'Read More',
-                      trimExpandedText: ' Show less',
-                      moreStyle: TextStyle(
-                        color: Color(0xFFC67C4E),
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w600,
-                        height: 0.12.h,
-                      ),
+                      subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ReadMoreText(
+                                notifications[index]["body"].toString(),
+                                style: TextStyle(
+                                  color: Color(0xFF9B9B9B),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                  height: 1.6.h,
+                                ),
+                                trimLines: 2,
+                                colorClickableText: Color(0xFFC67C4E),
+                                trimMode: TrimMode.Line,
+                                trimLength: 10,
+                                trimCollapsedText: 'Read More',
+                                trimExpandedText: 'Show Less',
+                                moreStyle: TextStyle(
+                                  color: Color(0xFFC67C4E),
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w600,
+                                  height: 0.12.h,
+                                ),
+                              ),
+                          ]),
                     ),
                   ),
                 ),
@@ -149,7 +167,8 @@ class _NotificationPageState extends State<NotificationPage> {
   }
 
   _launchURL() async {
-    final Uri url = Uri.parse('https://chat.whatsapp.com/IufAfSK4PhvJKiKiQ3Cn12');
+    final Uri url =
+        Uri.parse('https://chat.whatsapp.com/IufAfSK4PhvJKiKiQ3Cn12');
     if (!await launchUrl(url)) {
       throw Exception('Could not launch url');
     }

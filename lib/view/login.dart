@@ -26,7 +26,7 @@ class _LoginState extends State<Login> {
     FirebaseApi();
   }
 
-  var name;
+  var name ="";
 
   Future<void> fetchName(String userid) async {
     try {
@@ -47,7 +47,6 @@ class _LoginState extends State<Login> {
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
         name = data[0]["firstName"];
-        print(data[0]["firstName"]);
         setState(() {});
       } else {
         print(response.body.toString());
@@ -69,7 +68,7 @@ class _LoginState extends State<Login> {
   String? validateString(String value) {
     final RegExp regex = RegExp(r'^K\/\d+\/\d{4}$');
     if (!regex.hasMatch(value)) {
-      return 'Invalid format. Format should be like "K/333/2008"';
+      return 'Invalid format. Format like "K/000/2008"';
     }
     return null;
   }

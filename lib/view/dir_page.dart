@@ -27,8 +27,12 @@ class _MyPhoneDirectoryState extends State<MyPhoneDirectoryPage> {
   }
 
 
+TextEditingController _searchData = TextEditingController();
+
+
   @override
   Widget build(BuildContext context) {
+
     return Consumer2<MyPhoneDirectoryProvider, UserDataProvider>(
       builder: (context, phoneDirProvider, userDataProvider, child) {
         var pro = context.read<ControllerData>();
@@ -56,9 +60,9 @@ class _MyPhoneDirectoryState extends State<MyPhoneDirectoryPage> {
                       backgroundColor: Colors.white,
                       backgroundImage: userDataProvider.data?.image != null
                           ? MemoryImage(
-                              base64Decode(userDataProvider.data!.image ?? ""))
+                          base64Decode(userDataProvider.data!.image ?? ""))
                           : const AssetImage('assets/images/man.png')
-                              as ImageProvider<Object>?,
+                      as ImageProvider<Object>?,
                     ),
                   ),
                   Padding(
@@ -72,10 +76,12 @@ class _MyPhoneDirectoryState extends State<MyPhoneDirectoryPage> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: TextField(
+                      controller: _searchData,
                       onChanged: (value) {
                         if (value.isEmpty) {
                           phoneDirProvider.isSearching = false;
-                          context.read<MyPhoneDirectoryProvider>().clearSearch();
+                          phoneDirProvider.filteredContacts.clear(); // Call the method to clear filtered list
+                          context.read<MyPhoneDirectoryProvider>().fetchData(); // Fetch again from beginning
                         } else {
                           phoneDirProvider.isSearching = true;
                           phoneDirProvider.searchData(value);
@@ -88,34 +94,38 @@ class _MyPhoneDirectoryState extends State<MyPhoneDirectoryPage> {
                     child: phoneDirProvider.filteredContacts.isEmpty
                         ? Center(child: CircularProgressIndicator())
                         : NotificationListener<ScrollNotification>(
-                            onNotification: (ScrollNotification scrollInfo) {
-                              if (!phoneDirProvider.isLoading && scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent && !phoneDirProvider.reachedEnd) {
-                                phoneDirProvider.fetchData();
+                      onNotification: (ScrollNotification scrollInfo) {
+                        if (!phoneDirProvider.isLoading && scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent && !phoneDirProvider.reachedEnd) {
+                          phoneDirProvider.fetchData();
+                        }
+                        return true;
+                      },
+                      child: RefreshIndicator(
+                        onRefresh: () async{
+                          context.read<UserDataProvider>().fetchUserData();
+                          context.read<MyPhoneDirectoryProvider>().fetchData();
+                        },
+                        child: Scrollbar(
+                          thickness: 3,
+                          interactive: true,
+                          child: ListView.builder(
+                            itemCount: phoneDirProvider.filteredContacts.length + (phoneDirProvider.reachedEnd ? 0 : 1),
+                            itemBuilder: (context, index) {
+                              if (index < phoneDirProvider.filteredContacts.length) {
+                                return _buildContactItem(phoneDirProvider.filteredContacts[index]);
+                              } else {
+                                return Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Center(
+                                    child: _searchData.text.isEmpty? CircularProgressIndicator() :null,
+                                  ),
+                                );
                               }
-                              return true;
                             },
-                            child: RefreshIndicator(
-                              onRefresh: () async{
-                                context.read<UserDataProvider>().fetchUserData();
-                                context.read<MyPhoneDirectoryProvider>().fetchData();
-                              },
-                              child: ListView.builder(
-                                itemCount: phoneDirProvider.filteredContacts.length + (phoneDirProvider.reachedEnd ? 0 : 1),
-                                itemBuilder: (context, index) {
-                                  if (index < phoneDirProvider.filteredContacts.length) {
-                                    return _buildContactItem(phoneDirProvider.filteredContacts[index]);
-                                  } else {
-                                    return Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Center(
-                                        child: CircularProgressIndicator(),
-                                      ),
-                                    );
-                                  }
-                                },
-                              ),
-                            ),
                           ),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -154,7 +164,7 @@ class _MyPhoneDirectoryState extends State<MyPhoneDirectoryPage> {
                       image: contact.image != null
                           ? MemoryImage(base64Decode(contact.image))
                           : AssetImage('assets/images/man.png')
-                              as ImageProvider<Object>,
+                      as ImageProvider<Object>,
                     ),
                   ),
                 ),
@@ -230,7 +240,7 @@ class _MyPhoneDirectoryState extends State<MyPhoneDirectoryPage> {
               image: contact.image != null
                   ? MemoryImage(base64Decode(contact.image))
                   : AssetImage('assets/images/man.png')
-                      as ImageProvider<Object>,
+              as ImageProvider<Object>,
               fit: BoxFit.cover,
             ),
           ),
@@ -390,20 +400,41 @@ class InfoDialog extends StatelessWidget {
                     ),
                   ),
                   ...clerks.map((clerk) => Padding(
-                        padding: const EdgeInsets.only(left: 16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                    padding: const EdgeInsets.only(left: 16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SelectableText.rich(
+                          TextSpan(
+                            text: 'Name: ',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                            children: [
+                              TextSpan(
+                                text: '${clerk.name ?? "N/A"}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.normal,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Row(
                           children: [
                             SelectableText.rich(
                               TextSpan(
-                                text: 'Name: ',
+                                text: 'Phone: ',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black,
                                 ),
                                 children: [
                                   TextSpan(
-                                    text: '${clerk.name ?? "N/A"}',
+                                    text: '${clerk.phone ?? "N/A"}',
                                     style: TextStyle(
                                       fontWeight: FontWeight.normal,
                                       color: Colors.black,
@@ -412,39 +443,18 @@ class InfoDialog extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            SizedBox(height: 10),
-                            Row(
-                              children: [
-                                SelectableText.rich(
-                                  TextSpan(
-                                    text: 'Phone: ',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
-                                    ),
-                                    children: [
-                                      TextSpan(
-                                        text: '${clerk.phone ?? "N/A"}',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.normal,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 10),
-                                  child: IconButton(onPressed: () {
-                                    _callNumber(clerk.phone.toString());
-                                  }, icon: Icon(Icons.call)),
-                                )
-                              ],
-                            ),
-                            SizedBox(height: 10),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 10),
+                              child: IconButton(onPressed: () {
+                                _callNumber(clerk.phone.toString());
+                              }, icon: Icon(Icons.call)),
+                            )
                           ],
                         ),
-                      )),
+                        SizedBox(height: 10),
+                      ],
+                    ),
+                  )),
                   SizedBox(height: 8),
                   Row(
                     children: [

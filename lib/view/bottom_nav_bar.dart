@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:taba_app_android/view/notification.dart';
-import 'package:taba_app_android/view/passwordreset.dart';
 import 'package:taba_app_android/view/paymentpage.dart';
 import 'package:taba_app_android/view/profile.dart';
 import '../widgets/appdrawer.dart';

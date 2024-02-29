@@ -42,6 +42,27 @@ class _ProfilePageState extends State<ProfilePage> {
     // dataMaster();
   }
 
+  @override
+  void dispose() {
+    _firstname.dispose();
+    _lastname.dispose();
+    _phone.dispose();
+    _whatsapp.dispose();
+    _address.dispose();
+    _officeaddress.dispose();
+    _email.dispose();
+    _pincode.dispose();
+    _state.dispose();
+    _district.dispose();
+    _dob.dispose();
+    _clerkname1.dispose();
+    _clerkphone1.dispose();
+    _clerkname2.dispose();
+    _clerkphone2.dispose();
+    super.dispose();
+  }
+
+
   User? userData;
 
   var result;
@@ -93,7 +114,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
       sendUserDataRequest(newUser);
 
-    } else if (result == null) {
+    } else{
       User newUser = User(
         regNo: widget.item["regNo"],
         phone: _phone.text,
@@ -116,8 +137,6 @@ class _ProfilePageState extends State<ProfilePage> {
         state: _state.text,
         whatsAppno: _whatsapp.text,
       );
-      print('regNo: ${widget.item["regNo"]}');
-      print('phone: ${_phone.text}');
       uploadData(newUser);
     }
   }
@@ -134,14 +153,14 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return file;
   }
-
   Future<void> uploadData(User userData) async {
     var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/upload'));
 
     if (_image == null || _image!.path.isEmpty) {
+      // Function to convert base64 string to image file
       Future<File> base64ToImage(String base64String) async {
         Directory documentsDirectory = await getApplicationDocumentsDirectory();
-        String outputPath = '${documentsDirectory.path}/decoded_image.jpg';
+        String outputPath = '${documentsDirectory.path}/image${DateTime.now().toString()}.jpg';
 
         List<int> imageBytes = base64Decode(base64String);
         File imageFile = File(outputPath);
@@ -151,9 +170,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
       String base64String = defaultImage; // Your base64 string
       File decodedImage = await base64ToImage(base64String);
-      print(decodedImage.path);
       _image = decodedImage;
-      print(_image?.path);
     }
 
     // Convert User object to a map
@@ -167,23 +184,88 @@ class _ProfilePageState extends State<ProfilePage> {
     File compressedImage = await _compressImage(_image!);
     var imageFile = await http.MultipartFile.fromPath(
         'image', compressedImage.path,
-        contentType: MediaType('image', 'jpeg'), filename: "1234.jpeg");
+        contentType: MediaType('image', 'jpeg'), filename: "image${DateTime.now().toString()}.jpeg");
     request.files.add(imageFile);
+    request.fields.forEach((key, value) {
+      debugPrint('$key: $value');
+    });
     // Send the request
     try {
       var response = await request.send();
+
       if (response.statusCode == 200) {
+
         print('Request sent successfully');
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>Login(),
+            ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Success"), backgroundColor: Colors.green,),
+        );
       } else {
-        print('Failed to send request. Status code: ${response.statusCode}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Failed"), backgroundColor: Colors.red,),
+        );
       }
-    } catch (error) {
-      print('Error sending request: $error');
+    } catch (e) {
+      print('Error sending request: $e');
+      SnackBar(content: Text("Failed"), backgroundColor: Colors.red,);
+
     }
   }
 
+  // Future<void> uploadData(User userData) async {
+  //   var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/upload'));
+  //
+  //   if (_image == null || _image!.path.isEmpty) {
+  //     Future<File> base64ToImage(String base64String) async {
+  //       Directory documentsDirectory = await getApplicationDocumentsDirectory();
+  //       String outputPath = '${documentsDirectory.path}/image${DateTime.now().toString()}.jpg';
+  //
+  //       List<int> imageBytes = base64Decode(base64String);
+  //       File imageFile = File(outputPath);
+  //       await imageFile.writeAsBytes(imageBytes);
+  //       return imageFile;
+  //     }
+  //
+  //     String base64String = defaultImage; // Your base64 string
+  //     File decodedImage = await base64ToImage(base64String);
+  //     print(decodedImage.path);
+  //     _image = decodedImage;
+  //     print(_image?.path);
+  //   }
+  //
+  //   // Convert User object to a map
+  //   Map<String, dynamic> userMap = userData.toJson();
+  //   // Iterate through the map and set fields in the request
+  //   userMap.forEach((key, value) {
+  //     request.fields[key] = value.toString();
+  //   });
+  //
+  //   // Add the image file as a MultipartFile
+  //   File compressedImage = await _compressImage(_image!);
+  //   var imageFile = await http.MultipartFile.fromPath(
+  //       'image', compressedImage.path,
+  //       contentType: MediaType('image', 'jpeg'), filename: "1234.jpeg");
+  //   request.files.add(imageFile);
+  //   // Send the request
+  //   try {
+  //     var response = await request.send();
+  //
+  //     if (response.statusCode == 200){
+  //       print('Request sent successfully');
+  //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Sucess"),backgroundColor: Colors.green,));
+  //     } else {
+  //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed"),backgroundColor: Colors.red,));
+  //     }
+  //   } catch (e) {
+  //     // print('Error sending request: $e');
+  //   }
+  // }
+
   Future<void> sendUserDataRequest(User userData) async {
-    print("${result["password"]}");
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     var id = prefs.getString("id");
@@ -195,22 +277,22 @@ class _ProfilePageState extends State<ProfilePage> {
     if (_image == null || _image!.path.isEmpty) {
       Future<File> base64ToImage(String base64String) async {
         Directory documentsDirectory = await getApplicationDocumentsDirectory();
-        String outputPath = '${documentsDirectory.path}/decoded_image.jpg';
+        String outputPath = '${documentsDirectory.path}/image${DateTime.now().toString()}.jpg';
 
         List<int> imageBytes = base64Decode(base64String);
         File imageFile = File(outputPath);
         await imageFile.writeAsBytes(imageBytes);
         return imageFile;
       }
-if(result["image"] != null){
-  String base64String = result["image"]; // Your base64 string
-  File decodedImage = await base64ToImage(base64String);
-  _image = decodedImage;
-}else{
-  String base64String = defaultImage; // Your base64 string
-  File decodedImage = await base64ToImage(base64String);
-  _image = decodedImage;
-}
+      if(result["image"] != null){
+        String base64String = result["image"]; // Your base64 string
+        File decodedImage = await base64ToImage(base64String);
+        _image = decodedImage;
+      }else{
+        String base64String = defaultImage; // Your base64 string
+        File decodedImage = await base64ToImage(base64String);
+        _image = decodedImage;
+      }
     }
 
     // Convert User object to a map
@@ -227,17 +309,14 @@ if(result["image"] != null){
       'image',
       compressedImage.path,
       contentType: MediaType('image', 'jpeg'),
-      filename: "1234.jpeg",
+      filename: "image${DateTime.now().toString()}.jpeg",
     );
     request.files.add(imageFile);
 
-    // Print out the data being sent to the API
-    // print('PUT Request Data:');
-    // print('URL: ${request.url}');
-    // print('Fields:');
-    // request.fields.forEach((key, value) {
-    //   print('$key: $value');
-    // });
+    request.fields.forEach((key, value) {
+      debugPrint('$key: $value');
+    });
+
     // print('Files:');
     // request.files.forEach((file) {
     //   print('Field name: ${file.field}');
@@ -250,12 +329,18 @@ if(result["image"] != null){
     try {
       var response = await request.send();
       if (response.statusCode == 200) {
-        print(response.toString());
-        print('Request sent successfully');
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Data updated successfully"),backgroundColor: Colors.green,));
+
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>BottomNavigationPage(),
+            ));
       } else {
-        print('Failed to send request. Status code: ${response.statusCode}');
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to update"),backgroundColor: Colors.green,));
       }
     } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to update"),backgroundColor: Colors.green,));
       print('Error sending request: $error');
     }
   }
@@ -444,7 +529,6 @@ if(result["image"] != null){
     var pro= Provider.of<UserDataProvider>(context);
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
-    // print("Current image: $_image");
 
     return GestureDetector(
       onTap: () {
@@ -541,7 +625,6 @@ if(result["image"] != null){
                               hinttext: "Name",
                               onchange: (val) {
                                 userData?.firstName = val;
-                                print(_firstname.text);
                               },
                               obsecuretxt: false,
                             ),
@@ -596,7 +679,6 @@ if(result["image"] != null){
                               ontap:_nameedit != true ? ()async{
                                 var datePicked = await DatePicker.showSimpleDatePicker(context, firstDate: DateTime(1900), dateFormat: "dd-MM-yyyy", locale: DateTimePickerLocale.en_us, looping: true,);
                                 if (datePicked != null) {
-                                  // print(datePicked.toString());
                                   var enrollDate = DateFormat('dd-MM-yyyy').format(datePicked);
                                   _dob.text = enrollDate;
                                   userData?.dob = enrollDate.toString();
@@ -626,7 +708,6 @@ if(result["image"] != null){
                                 onPressed:_nameedit != true ? () async {
                                   var datePicked = await DatePicker.showSimpleDatePicker(context, firstDate: DateTime(1900), dateFormat: "dd-MM-yyyy", locale: DateTimePickerLocale.en_us, looping: true,);
                                   if (datePicked != null) {
-                                    // print(datePicked.toString());
                                     var enrollDate = DateFormat('dd-MM-yyyy').format(datePicked);
                                     _dob.text = enrollDate;
                                     userData?.dob = enrollDate.toString();
@@ -828,14 +909,12 @@ if(result["image"] != null){
                                         userData?.welfareMember = "yes";
                                         welfareData = "yes";
                                         setState(() {
-                                          print(welfareData);
                                         });
                                       } else if (_welfare == false) {
                                         _welfare = false;
                                         userData?.welfareMember = "no";
                                         welfareData = "no";
                                         setState(() {
-                                          print(welfareData);
                                         });
                                       }
                                       // setState(() {});
@@ -868,14 +947,9 @@ if(result["image"] != null){
                                     final SharedPreferences prefs = await SharedPreferences.getInstance();
                                     var regNo = prefs.getString("regNo");
                                     await addData();
-                                    await context.read<UserDataProvider>().fetchUserData();
-                                    Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => regNo != null
-                                              ? BottomNavigationPage()
-                                              : Login(),
-                                        ));
+                                    if(regNo != null){
+                                      await context.read<UserDataProvider>().fetchUserData();
+                                    }
                                   },
                                   child: Text(
                                     "save",
