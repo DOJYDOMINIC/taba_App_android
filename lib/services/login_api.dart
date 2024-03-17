@@ -68,15 +68,16 @@ Future<void> notificationPost(String token, BuildContext context) async {
   try {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     var regNo = prefs.getString("regNo");
-    final response = await http.post(
-      Uri.parse("$notificationUrl/register-device"),
+    final response = await http.post(Uri.parse("$notificationUrl/register-device"),
       headers: {
         "Content-Type": "application/json",
       },
-      body: jsonEncode({
+      body: jsonEncode(
+          {
         "regNo": regNo,
         "token": token,
-      }),
+      }
+      ),
     );
     print(token);
 

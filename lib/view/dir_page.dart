@@ -79,15 +79,12 @@ class _MyPhoneDirectoryState extends State<MyPhoneDirectoryPage> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: TextField(
+
                       controller: _searchData,
                       onChanged: (value){
-                        if (value.isEmpty) {
-                          // phoneDirProvider.isSearching = false;
-                          // phoneDirProvider.filteredContacts.clear();
-                          // phoneDirProvider.fetchData();
-                          // _searchData.clear();
-                          Provider.of<MyPhoneDirectoryProvider>(context,listen: false).isSearching = false;
-                          // context.read<MyPhoneDirectoryProvider>().isSearching = false;
+                        if (value.length <=1) {
+                          phoneDirProvider.isSearching = false;
+                          phoneDirProvider.fetchData();
                         }else{
                           phoneDirProvider.isSearching = true;
                           phoneDirProvider.searchData(value);
@@ -95,14 +92,9 @@ class _MyPhoneDirectoryState extends State<MyPhoneDirectoryPage> {
                       },
                       onSubmitted: (value) {
                         if (value.isEmpty) {
-                          // phoneDirProvider.filteredContacts.clear();
-                          // phoneDirProvider.isSearching = false;
-                          // phoneDirProvider.fetchData();
-                          // _searchData.clear();
-                          // context.read<MyPhoneDirectoryProvider>().isSearching = false;
-                          Provider.of<MyPhoneDirectoryProvider>(context,listen: false).isSearching = false;
-
-                        } else {
+                          phoneDirProvider.isSearching = false;
+                          phoneDirProvider.fetchData();
+                        } else if(value.length >=0) {
                           phoneDirProvider.isSearching = true;
                           phoneDirProvider.searchData(value);
                         }
@@ -110,7 +102,6 @@ class _MyPhoneDirectoryState extends State<MyPhoneDirectoryPage> {
                       decoration: myInputDecoration,
                     ),
                   ),
-
                   Expanded(
                     child: phoneDirProvider.filteredContacts.isEmpty
                         ? Center(child: CircularProgressIndicator())
@@ -126,25 +117,17 @@ class _MyPhoneDirectoryState extends State<MyPhoneDirectoryPage> {
                       },
                       child: RefreshIndicator(
                         onRefresh: () async {
-                          _searchData.clear();
-                          // phoneDirProvider.filteredContacts.clear();
-                          // phoneDirProvider.isSearching = false;
-                          // phoneDirProvider.fetchData();
                           context.read<MyPhoneDirectoryProvider>().isSearching = false;
-                        },
+                          phoneDirProvider.fetchData();
+                          },
                         child: Scrollbar(
+                          thumbVisibility: true,
                           thickness: 3,
-                          interactive: true,
                           child: ListView.builder(
-                            itemCount: phoneDirProvider
-                                .filteredContacts.length +
-                                (phoneDirProvider.reachedEnd ? 0 : 1),
+                            itemCount: phoneDirProvider.filteredContacts.length + (phoneDirProvider.reachedEnd ? 0 : 1),
                             itemBuilder: (context, index) {
-                              if (index <
-                                  phoneDirProvider.filteredContacts.length) {
-                                return _buildContactItem(
-                                    phoneDirProvider.filteredContacts[
-                                    index]);
+                              if (index < phoneDirProvider.filteredContacts.length) {
+                                return _buildContactItem(phoneDirProvider.filteredContacts[index]);
                               } else {
                                 return Padding(
                                   padding: const EdgeInsets.all(8.0),
@@ -157,7 +140,7 @@ class _MyPhoneDirectoryState extends State<MyPhoneDirectoryPage> {
                               }
                             },
                           ),
-                        ),
+                        )
                       ),
                     ),
                   ),
@@ -226,7 +209,7 @@ class _MyPhoneDirectoryState extends State<MyPhoneDirectoryPage> {
                       ),
                     ),
                     SizedBox(height: 5.sp),
-                    Text(contact.nickName == null || contact.nickName == ""  ?"(No Nickname)": "(${contact.nickName ?? ""})",
+                    Text(contact.nickName == null || contact.nickName == ""  ?"(No Nick Name)": "(${contact.nickName ?? ""})",
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 14.sp,
@@ -253,7 +236,11 @@ class _MyPhoneDirectoryState extends State<MyPhoneDirectoryPage> {
               padding: const EdgeInsets.only(right: 20),
               child: IconButton(
                 onPressed: () {
-                  _callNumber(contact.phone.toString());
+                  if(contact.phone.toString().length > 9) {
+                    _callNumber(contact.phone.toString());
+                  }else{
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Please check the Number"),backgroundColor: Colors.red,));
+                  }
                 },
                 icon: Icon(
                   Icons.call,
@@ -308,11 +295,10 @@ class _MyPhoneDirectoryState extends State<MyPhoneDirectoryPage> {
           ClerkInfo(
               name: contact.clerkName2 ?? "", phone: contact.clerkPhone2 ?? ""),
         ],
-        bloodGroup: '${contact.bloodGroup ?? ""}', wpNumber: contact.whatsAppno??"",
+        bloodGroup: '${contact.bloodGroup ?? ""}', wpNumber: contact.whatsAppno??"", carNumber1: contact.carNumber1??"", carNumber2: contact.carNumber2??"", officeNumber: contact.officeNo??"",
       ),
     );
   }
-
   void _callNumber(String number) async {
     await FlutterPhoneDirectCaller.callNumber(number);
   }
@@ -325,6 +311,9 @@ class InfoDialog extends StatelessWidget {
   final String wpNumber;
   final List<ClerkInfo> clerks;
   final String bloodGroup;
+  final String carNumber1;
+  final String carNumber2;
+  final String officeNumber;
   final ImageProvider<Object> image;
 
   InfoDialog({
@@ -335,6 +324,9 @@ class InfoDialog extends StatelessWidget {
     required this.clerks,
     required this.bloodGroup,
     required this.wpNumber,
+    required this.carNumber1,
+    required this.carNumber2,
+    required this.officeNumber,
   });
 
   @override
@@ -390,149 +382,199 @@ class InfoDialog extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.grey.shade50,
           borderRadius: BorderRadius.circular(8),),
-        child: Scrollbar(
-          thumbVisibility: true,
-          interactive: true,
-          thickness: 5,
-          radius: const Radius.circular(2),
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(5.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(height: 5),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Home \nAddress: ',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(5.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(height: 5),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Home \nAddress: ',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
-                      Expanded(
-                        child: Text(
-                          '$homeAddress',
-                          style: TextStyle(
-                            fontWeight: FontWeight.normal,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 8),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Office \nAddress: ',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          '$officeAddress',
-                          style: TextStyle(
-                            fontWeight: FontWeight.normal,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Clerks:',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
                     ),
-                  ),
-                  ...clerks.map((clerk) => Padding(
-                    padding: const EdgeInsets.only(left: 16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SelectableText.rich(
-                          TextSpan(
-                            text: 'Name: ',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: '${clerk.name ?? "N/A"}',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.normal,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 10),
-                        Row(
-                          children: [
-                            SelectableText.rich(
-                              TextSpan(
-                                text: 'Phone: ',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
-                                children: [
-                                  TextSpan(
-                                    text: '${clerk.phone ?? "N/A"}',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.normal,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 8),
-                              child: IconButton(
-                                  onPressed: () {
-                                    _callNumber(clerk.phone.toString());
-                                  },
-                                  icon: Icon(Icons.call)),
-                            )
-                          ],
-                        ),
-                        SizedBox(height: 10),
-                      ],
-                    ),
-                  )),
-                  SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Text(
-                        'Blood Group: ',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                      Text(
-                        bloodGroup,
+                    Expanded(
+                      child: Text(
+                        '$homeAddress',
                         style: TextStyle(
                           fontWeight: FontWeight.normal,
                           color: Colors.black,
                         ),
                       ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Office \nAddress: ',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        '$officeAddress',
+                        style: TextStyle(
+                          fontWeight: FontWeight.normal,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Clerks:',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                ...clerks.map((clerk) => Padding(
+                  padding: const EdgeInsets.only(left: 16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SelectableText.rich(
+                        TextSpan(
+                          text: 'Name: ',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: '${clerk.name ?? "N/A"}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.normal,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      Row(
+                        children: [
+                          SelectableText.rich(
+                            TextSpan(
+                              text: 'Phone: ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                              children: [
+                                TextSpan(
+                                  text: '${clerk.phone ?? "N/A"}',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.normal,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8),
+                            child: IconButton(
+                                onPressed: () {
+                                  _callNumber(clerk.phone.toString());
+                                },
+                                icon: Icon(Icons.call)),
+                          )
+                        ],
+                      ),
+                      SizedBox(height: 10),
                     ],
                   ),
-                ],
-              ),
+                )),
+                Row(
+                  children: [
+                    Text(
+                      'Office Number : ',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    Text(
+                      officeNumber,
+                      style: TextStyle(
+                        fontWeight: FontWeight.normal,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8),
+                Row(
+                  children: [
+                    Text(
+                      'Blood Group: ',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    Text(
+                      bloodGroup,
+                      style: TextStyle(
+                        fontWeight: FontWeight.normal,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8),
+                Row(
+                  children: [
+                    Text(
+                      'CarNumber 1: ',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    Text(
+                      carNumber1,
+                      style: TextStyle(
+                        fontWeight: FontWeight.normal,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8),
+                Row(
+                  children: [
+                    Text(
+                      'CarNumber 2: ',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    Text(
+                      carNumber2,
+                      style: TextStyle(
+                        fontWeight: FontWeight.normal,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),
@@ -555,7 +597,7 @@ class InfoDialog extends StatelessWidget {
     }
   }
   void _callNumber(String number) async {
-    if(number.length> 8){
+    if(number.length > 9){
       await FlutterPhoneDirectCaller.callNumber(number);
     }
   }

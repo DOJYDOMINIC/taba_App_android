@@ -20,9 +20,6 @@ class _PaymentPageState extends State<PaymentPage> {
     super.initState();
     context.read<UserDataProvider>().fetchUserData();
   }
-
-
-
   @override
   Widget build(BuildContext context,) {
     var pro = context.read<ControllerData>();
@@ -39,7 +36,7 @@ class _PaymentPageState extends State<PaymentPage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Center(
-          child:amountPaid == ""? CircularProgressIndicator(): SizedBox(
+          child:user.data == null? CircularProgressIndicator(): SizedBox(
             width: width,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

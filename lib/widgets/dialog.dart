@@ -17,7 +17,7 @@ void showPlatformDialog(BuildContext context, String text ) {
             TextButton(
               child: const Text('OK'),
               onPressed: () {
-                if(text == "please reset your password to continue"){
+                if(text == "Please reset your password to continue"){
                   Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PasswordResetPage(),));
                 }else{
                   Navigator.of(context).pop();
@@ -40,7 +40,7 @@ void showPlatformDialog(BuildContext context, String text ) {
             TextButton(
               child: const Text('OK'),
               onPressed: () {
-                if(text == "please reset your password to continue"){
+                if(text == "Please reset your password to continue"){
                   Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PasswordResetPage(),));
                 }else{
                   Navigator.of(context).pop();

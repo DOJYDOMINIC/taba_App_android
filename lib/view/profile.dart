@@ -36,10 +36,9 @@ class _ProfilePageState extends State<ProfilePage> {
     fetchData();
     whatsappNumber();
     welfare();
-    // nameEdit();
-    // context.read<UserDataProvider>().fetchUserData();
-    // dataMaster();
+    fetchData();
   }
+
 
   @override
   void dispose() {
@@ -48,6 +47,10 @@ class _ProfilePageState extends State<ProfilePage> {
     _whatsapp.dispose();
     _address.dispose();
     _officeaddress.dispose();
+    _officeNo.dispose();
+    _carNumber2.dispose();
+    _carNumber1.dispose();
+    _nickName.dispose();
     _email.dispose();
     _pincode.dispose();
     _state.dispose();
@@ -60,7 +63,6 @@ class _ProfilePageState extends State<ProfilePage> {
     super.dispose();
   }
 
-
   User? userData;
 
   var result;
@@ -69,7 +71,7 @@ class _ProfilePageState extends State<ProfilePage> {
   fetchData() async {
     try {
       result = box.get(0);
-      if(result != null){
+      if (result != null) {
         userData = User.fromJson(result);
       }
     } catch (error) {
@@ -80,66 +82,63 @@ class _ProfilePageState extends State<ProfilePage> {
   String? welfareData;
   late var bloodGroup = userData?.bloodGroup ?? "BloodGroup";
 
-
- Future<void> addData() async {
+  Future<void> addData() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     var id = prefs.getString("id");
     if (userData != null) {
       User newUser = User(
-          id: id,
-          regNo: userData?.regNo,
-          phone: userData?.phone ?? "",
-          firstName: userData?.firstName ?? "",
-          email: userData?.email ?? "",
-          dob: userData?.dob ?? "",
-          address: userData?.address ?? "",
-          officeNo: userData?.officeNo??"",
-          nickName: userData?.nickName??"",
-          officeAddress: userData?.officeAddress ?? "",
-          clerkName1: userData?.clerkName1 ?? "",
-          clerkName2: userData?.clerkName2 ?? "",
-          clerkPhone1: userData?.clerkPhone1 ?? "",
-          clerkPhone2: userData?.clerkPhone2 ?? "",
-          bloodGroup: userData?.bloodGroup ?? "",
-          welfareMember: userData?.welfareMember ?? "",
-          enrollmentDate: userData?.enrollmentDate ?? "",
-          pincode: userData?.pincode ?? "",
-          district: userData?.district ?? "",
-          state: userData?.state ?? "",
-          whatsAppno: userData?.whatsAppno ?? "",
-          password: userData?.password,
-        carNumber1:userData?.carNumber1??"",
-        carNumber2:userData?.carNumber1??"",
-
+        id: id,
+        regNo: userData?.regNo,
+        phone: userData?.phone ?? "No data",
+        firstName: userData?.firstName ?? "No data",
+        email: userData?.email ?? "No data",
+        dob: userData?.dob ?? "No data",
+        address: userData?.address ?? "No data",
+        officeNo: userData?.officeNo ?? "No data",
+        nickName: userData?.nickName ?? "No data",
+        officeAddress: userData?.officeAddress ?? "No data",
+        clerkName1: userData?.clerkName1 ?? "No data",
+        clerkName2: userData?.clerkName2 ?? "No data",
+        clerkPhone1: userData?.clerkPhone1 ?? "No data",
+        clerkPhone2: userData?.clerkPhone2 ?? "No data",
+        bloodGroup: userData?.bloodGroup ?? "No data",
+        welfareMember: userData?.welfareMember ?? "No data",
+        enrollmentDate: userData?.enrollmentDate ?? "No data",
+        pincode: userData?.pincode ?? "No data",
+        district: userData?.district ?? "No data",
+        state: userData?.state ?? "No data",
+        whatsAppno: userData?.whatsAppno ?? "No data",
+        password: userData?.password,
+        carNumber1: userData?.carNumber1 ?? "No data",
+        carNumber2: userData?.carNumber2 ?? "No data",
       );
       sendUserDataRequest(newUser);
-    } else{
+    } else {
       User newUser = User(
-        regNo: widget.item["regNo"],
-        phone: _phone.text,
-        firstName: _firstname.text,
+          regNo: widget.item["regNo"],
+          phone: _phone.text,
+          firstName: _firstname.text,
+          password: widget.item["password"],
+          email: _email.text,
+          dob: _dob.text,
+          officeNo: _officeNo.text,
+          nickName: _nickName.text,
+          address: _address.text,
+          officeAddress: _officeaddress.text,
+          clerkName1: _clerkname1.text,
+          clerkName2: _clerkname2.text,
+          clerkPhone1: _clerkphone1.text,
+          clerkPhone2: _clerkphone2.text,
+          bloodGroup: selectedValue,
+          welfareMember: welfareData,
+          enrollmentDate: widget.item["enrollmentDate"],
+          pincode: _pincode.text,
+          district: _district.text,
+          state: _state.text,
+          whatsAppno: _whatsapp.text,
+          carNumber1: _carNumber1.text,
+          carNumber2: _carNumber2.text);
 
-        password: widget.item["password"],
-        email: _email.text,
-        dob: _dob.text,
-        officeNo: _officeNo.text,
-        nickName: _nickName.text,
-        address: _address.text,
-        officeAddress: _officeaddress.text,
-        clerkName1: _clerkname1.text,
-        clerkName2: _clerkname2.text,
-        clerkPhone1: _clerkphone1.text,
-        clerkPhone2: _clerkphone2.text,
-        bloodGroup: selectedValue,
-        welfareMember: welfareData,
-        enrollmentDate: widget.item["enrollmentDate"],
-        pincode: _pincode.text,
-        district: _district.text,
-        state: _state.text,
-        whatsAppno: _whatsapp.text,
-        carNumber1: _carNumber1.text,
-        carNumber2: _clerkphone2.text
-      );
       uploadData(newUser);
     }
   }
@@ -163,7 +162,8 @@ class _ProfilePageState extends State<ProfilePage> {
       // Function to convert base64 string to image file
       Future<File> base64ToImage(String base64String) async {
         Directory documentsDirectory = await getApplicationDocumentsDirectory();
-        String outputPath = '${documentsDirectory.path}/image${DateTime.now().toString()}.jpg';
+        String outputPath =
+            '${documentsDirectory.path}/image${DateTime.now().toString()}.jpg';
 
         List<int> imageBytes = base64Decode(base64String);
         File imageFile = File(outputPath);
@@ -187,7 +187,8 @@ class _ProfilePageState extends State<ProfilePage> {
     File compressedImage = await _compressImage(_image!);
     var imageFile = await http.MultipartFile.fromPath(
         'image', compressedImage.path,
-        contentType: MediaType('image', 'jpeg'), filename: "image${DateTime.now().toString()}.jpeg");
+        contentType: MediaType('image', 'jpeg'),
+        filename: "image${DateTime.now().toString()}.jpeg");
     request.files.add(imageFile);
     request.fields.forEach((key, value) {
       debugPrint('$key: $value');
@@ -197,101 +198,63 @@ class _ProfilePageState extends State<ProfilePage> {
       var response = await request.send();
 
       if (response.statusCode == 200) {
-
         print('Request sent successfully');
         Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) =>Login(),
+              builder: (context) => Login(),
             ));
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Success"), backgroundColor: Colors.green,),
+          SnackBar(
+            content: Text("Success"),
+            backgroundColor: Colors.green,
+          ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed"), backgroundColor: Colors.red,),
+          SnackBar(
+            content: Text("Failed"),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } catch (e) {
       print('Error sending request: $e');
-      SnackBar(content: Text("Failed"), backgroundColor: Colors.red,);
-
+      SnackBar(
+        content: Text("Failed"),
+        backgroundColor: Colors.red,
+      );
     }
   }
 
-  // Future<void> uploadData(User userData) async {
-  //   var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/upload'));
-  //
-  //   if (_image == null || _image!.path.isEmpty) {
-  //     Future<File> base64ToImage(String base64String) async {
-  //       Directory documentsDirectory = await getApplicationDocumentsDirectory();
-  //       String outputPath = '${documentsDirectory.path}/image${DateTime.now().toString()}.jpg';
-  //
-  //       List<int> imageBytes = base64Decode(base64String);
-  //       File imageFile = File(outputPath);
-  //       await imageFile.writeAsBytes(imageBytes);
-  //       return imageFile;
-  //     }
-  //
-  //     String base64String = defaultImage; // Your base64 string
-  //     File decodedImage = await base64ToImage(base64String);
-  //     print(decodedImage.path);
-  //     _image = decodedImage;
-  //     print(_image?.path);
-  //   }
-  //
-  //   // Convert User object to a map
-  //   Map<String, dynamic> userMap = userData.toJson();
-  //   // Iterate through the map and set fields in the request
-  //   userMap.forEach((key, value) {
-  //     request.fields[key] = value.toString();
-  //   });
-  //
-  //   // Add the image file as a MultipartFile
-  //   File compressedImage = await _compressImage(_image!);
-  //   var imageFile = await http.MultipartFile.fromPath(
-  //       'image', compressedImage.path,
-  //       contentType: MediaType('image', 'jpeg'), filename: "1234.jpeg");
-  //   request.files.add(imageFile);
-  //   // Send the request
-  //   try {
-  //     var response = await request.send();
-  //
-  //     if (response.statusCode == 200){
-  //       print('Request sent successfully');
-  //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Sucess"),backgroundColor: Colors.green,));
-  //     } else {
-  //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed"),backgroundColor: Colors.red,));
-  //     }
-  //   } catch (e) {
-  //     // print('Error sending request: $e');
-  //   }
-  // }
 
   Future<void> sendUserDataRequest(User userData) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     var id = prefs.getString("id");
 
-    var request = http.MultipartRequest('PUT', Uri.parse('$baseUrl/update/$id'));
+    var request =
+        http.MultipartRequest('PUT', Uri.parse('$baseUrl/update/$id'));
 
     // If _image is null or its path is empty, use a default image
 
     if (_image == null || _image!.path.isEmpty) {
       Future<File> base64ToImage(String base64String) async {
         Directory documentsDirectory = await getApplicationDocumentsDirectory();
-        String outputPath = '${documentsDirectory.path}/image${DateTime.now().toString()}.jpg';
+        String outputPath =
+            '${documentsDirectory.path}/image${DateTime.now().toString()}.jpg';
 
         List<int> imageBytes = base64Decode(base64String);
         File imageFile = File(outputPath);
         await imageFile.writeAsBytes(imageBytes);
         return imageFile;
       }
-      if(result["image"] != null){
+
+      if (result["image"] != null) {
         String base64String = result["image"]; // Your base64 string
         File decodedImage = await base64ToImage(base64String);
         _image = decodedImage;
-      }else{
+      } else {
         String base64String = defaultImage; // Your base64 string
         File decodedImage = await base64ToImage(base64String);
         _image = decodedImage;
@@ -332,18 +295,27 @@ class _ProfilePageState extends State<ProfilePage> {
     try {
       var response = await request.send();
       if (response.statusCode == 200) {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Data updated successfully"),backgroundColor: Colors.green,));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text("Data updated successfully"),
+          backgroundColor: Colors.green,
+        ));
 
         Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) =>BottomNavigationPage(),
+              builder: (context) => BottomNavigationPage(),
             ));
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to update"),backgroundColor: Colors.green,));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text("Failed to update"),
+          backgroundColor: Colors.green,
+        ));
       }
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to update"),backgroundColor: Colors.green,));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Failed to update"),
+        backgroundColor: Colors.green,
+      ));
       print('Error sending request: $error');
     }
   }
@@ -372,7 +344,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     // Create a temporary file and write the compressed bytes to it
     File compressedFile =
-    File('${Directory.systemTemp.path}/compressed_image.jpg');
+        File('${Directory.systemTemp.path}/compressed_image.jpg');
     compressedFile.writeAsBytesSync(compressedBytes);
     return compressedFile;
   }
@@ -408,6 +380,7 @@ class _ProfilePageState extends State<ProfilePage> {
   // }
 
   bool _welfare = false;
+
   Future<void> welfare() async {
     if (userData?.welfareMember == "yes") {
       _welfare = true;
@@ -416,6 +389,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
     setState(() {});
   }
+
   String? selectedValue;
 
   final _validateDetail = GlobalKey<FormState>();
@@ -460,7 +434,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _pickImageFromGallery() async {
     final pickedFile =
-    await _picker.pickImage(source: ImageSource.gallery, imageQuality: 15);
+        await _picker.pickImage(source: ImageSource.gallery, imageQuality: 15);
     if (pickedFile != null) {
       _image = File(pickedFile.path);
     }
@@ -469,46 +443,53 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _pickImageFromCamera() async {
     final pickedFile =
-    await _picker.pickImage(source: ImageSource.camera, imageQuality: 15);
+        await _picker.pickImage(source: ImageSource.camera, imageQuality: 15);
     if (pickedFile != null) {
       _image = File(pickedFile.path);
     }
     setState(() {});
   }
 
-
   late TextEditingController _firstname =
-  TextEditingController(text: userData?.firstName ?? "");
+      TextEditingController(text: userData?.firstName ?? "");
   late TextEditingController _phone =
-  TextEditingController(text: userData?.phone ?? "");
+      TextEditingController(text: userData?.phone ?? "");
   late TextEditingController _whatsapp =
-  TextEditingController(text: userData?.whatsAppno ?? "");
+      TextEditingController(text: userData?.whatsAppno ?? "");
   late TextEditingController _address =
-  TextEditingController(text: userData?.address ?? "");
+      TextEditingController(text: userData?.address ?? "");
   late TextEditingController _officeaddress =
-  TextEditingController(text: userData?.officeAddress ?? "");
+      TextEditingController(text: userData?.officeAddress ?? "");
   late TextEditingController _email =
-  TextEditingController(text: userData?.email ?? "");
+      TextEditingController(text: userData?.email ?? "");
   late TextEditingController _pincode =
-  TextEditingController(text: userData?.pincode ?? "");
+      TextEditingController(text: userData?.pincode ?? "");
   late TextEditingController _state =
-  TextEditingController(text: userData?.state ?? "");
+      TextEditingController(text: userData?.state ?? "");
   late TextEditingController _district =
-  TextEditingController(text: userData?.district);
+      TextEditingController(text: userData?.district);
   late TextEditingController _dob =
-  TextEditingController(text: userData?.dob ?? "");
+      TextEditingController(text: userData?.dob ?? "");
   late TextEditingController _clerkname1 =
-  TextEditingController(text: userData?.clerkName1);
+      TextEditingController(text: userData?.clerkName1);
   late TextEditingController _clerkphone1 =
-  TextEditingController(text: userData?.clerkPhone1);
+      TextEditingController(text: userData?.clerkPhone1);
   late TextEditingController _clerkname2 =
-  TextEditingController(text: userData?.clerkName2);
-  late TextEditingController _clerkphone2 = TextEditingController(text: userData?.clerkPhone2);
+      TextEditingController(text: userData?.clerkName2);
+  late TextEditingController _clerkphone2 =
+      TextEditingController(text: userData?.clerkPhone2);
 
-  late TextEditingController _nickName = TextEditingController(text: userData?.nickName);
-  late TextEditingController _carNumber1 = TextEditingController(text: userData?.carNumber1);
-  late TextEditingController _carNumber2 = TextEditingController(text: userData?.carNumber2);
-  late TextEditingController _officeNo = TextEditingController(text: userData?.officeNo);
+  late TextEditingController _nickName =
+      TextEditingController(text: userData?.nickName);
+
+  late TextEditingController _carNumber1 =
+      TextEditingController(text: userData?.carNumber1);
+
+  late TextEditingController _carNumber2 =
+      TextEditingController(text: userData?.carNumber2);
+
+  late TextEditingController _officeNo =
+      TextEditingController(text: userData?.officeNo);
 
   bool isPressed = false;
 
@@ -528,7 +509,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    var pro= Provider.of<UserDataProvider>(context);
+    var pro = Provider.of<UserDataProvider>(context);
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
 
@@ -576,12 +557,12 @@ class _ProfilePageState extends State<ProfilePage> {
                                     radius: 50.sp,
                                     backgroundImage: _image?.path == null
                                         ? MemoryImage(
-                                      base64Decode(userData?.image),
-                                    )
+                                            base64Decode(userData?.image),
+                                          )
                                         : Image.file(File(_image!.path)).image
-                                  // const AssetImage(
-                                  //             "assets/images/man.png") as ImageProvider<Object>?
-                                ),
+                                    // const AssetImage(
+                                    //             "assets/images/man.png") as ImageProvider<Object>?
+                                    ),
                               ),
                             if (userData?.image == null)
                               CircleAvatar(
@@ -592,8 +573,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                   radius: 50.sp,
                                   backgroundImage: _image?.path == null
                                       ? const AssetImage(
-                                      "assets/images/man.png")
-                                  as ImageProvider<Object>?
+                                              "assets/images/man.png")
+                                          as ImageProvider<Object>?
                                       : Image.file(File(_image!.path)).image,
                                 ),
                               ),
@@ -626,7 +607,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               TextFieldOne(
                                 readonly: false,
                                 controller: _firstname,
-                                hinttext: "Name",
+                                labeltext: "Name",
                                 onchange: (val) {
                                   userData?.firstName = val;
                                 },
@@ -635,7 +616,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               TextFieldOne(
                                   readonly: false,
                                   controller: _nickName,
-                                  hinttext: "Nick Name",
+                                  labeltext: "Nick Name",
                                   onchange: (val) {
                                     userData?.nickName = val ?? "";
                                   }),
@@ -647,9 +628,12 @@ class _ProfilePageState extends State<ProfilePage> {
                                         readonly: false,
                                         keytype: TextInputType.phone,
                                         controller: _phone,
-                                        hinttext: "phone",
+                                        labeltext: "Mobile",
                                         onchange: (val) {
-                                          userData?.phone = val;
+                                          userData?.phone =
+                                              val.toString().isNotEmpty
+                                                  ? val
+                                                  : "nil";
                                         }),
                                   ),
                                   Checkbox(
@@ -657,7 +641,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                       onChanged: (val) {
                                         _whatschek = !_whatschek;
                                         if (_whatschek == true) {
-                                          userData?.whatsAppno = userData?.phone;
+                                          userData?.whatsAppno =
+                                              userData?.phone;
                                         }
                                         setState(() {});
                                       }),
@@ -673,41 +658,41 @@ class _ProfilePageState extends State<ProfilePage> {
                                     readonly: false,
                                     controller: _whatsapp,
                                     keytype: TextInputType.phone,
-                                    hinttext: "Whatsapp number",
+                                    labeltext: "WhatsApp Number",
                                     onchange: (val) {
                                       userData?.whatsAppno = val;
                                     }),
                               TextFieldOne(
                                   readonly: false,
                                   controller: _officeNo,
-                                  hinttext: "officenumber",
+                                  keytype: TextInputType.phone,
+                                  labeltext: "Office Number",
                                   onchange: (val) {
-                                    userData?.officeNo = val ?? "";
+                                    userData?.officeNo =
+                                        val.toString().isNotEmpty ? val : "nil";
                                   }),
                               TextFieldOne(
                                 readonly: true,
-                                ontap:()async{
-                                  var datePicked = await DatePicker.showSimpleDatePicker(context, firstDate: DateTime(1900), dateFormat: "dd-MM-yyyy", locale: DateTimePickerLocale.en_us, looping: true,);
+                                ontap: () async {
+                                  var datePicked =
+                                      await DatePicker.showSimpleDatePicker(
+                                    context,
+                                    firstDate: DateTime(1900),
+                                    dateFormat: "dd/MM/yyyy",
+                                    locale: DateTimePickerLocale.en_us,
+                                    looping: true,
+                                  );
                                   if (datePicked != null) {
-                                    var enrollDate = DateFormat('dd-MM-yyyy').format(datePicked);
+                                    var enrollDate = DateFormat('dd/MM/yyyy')
+                                        .format(datePicked);
                                     _dob.text = enrollDate;
                                     userData?.dob = enrollDate.toString();
                                     setState(() {});
                                   }
                                 },
-                                hinttext: "DOB",
+                                labeltext: "DOB",
                                 keytype: TextInputType.number,
                                 controller: _dob,
-                                validator: (value) {
-                                  if (value!.isEmpty) {
-                                    return 'DOB date is required(dd-MM-yyyy)';
-                                  }
-
-                                  if (!isDateValid(value)) {
-                                    return 'Invalid date format. Please enter a valid date (dd-MM-yyyy)';
-                                  }
-                                  return null; // Return null if the validation is successful
-                                },
                                 onchange: (value) {
                                   List<String> parts = value.split(' ');
                                   userData?.dob = parts[0];
@@ -716,9 +701,17 @@ class _ProfilePageState extends State<ProfilePage> {
                                 obsecuretxt: false,
                                 sufix: IconButton(
                                   onPressed: () async {
-                                    var datePicked = await DatePicker.showSimpleDatePicker(context, firstDate: DateTime(1900), dateFormat: "dd-MM-yyyy", locale: DateTimePickerLocale.en_us, looping: true,);
+                                    var datePicked =
+                                        await DatePicker.showSimpleDatePicker(
+                                      context,
+                                      firstDate: DateTime(1900),
+                                      dateFormat: "dd/MM/yyyy",
+                                      locale: DateTimePickerLocale.en_us,
+                                      looping: true,
+                                    );
                                     if (datePicked != null) {
-                                      var enrollDate = DateFormat('dd-MM-yyyy').format(datePicked);
+                                      var enrollDate = DateFormat('dd/MM/yyyy')
+                                          .format(datePicked);
                                       _dob.text = enrollDate;
                                       userData?.dob = enrollDate.toString();
                                       setState(() {});
@@ -730,12 +723,14 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ),
                                 ),
                               ),
+
                               TextFieldOne(
                                   readonly: false,
                                   controller: _email,
-                                  hinttext: "email",
+                                  labeltext: "Email",
                                   onchange: (val) {
-                                    userData?.email = val ?? "";
+                                    userData?.email =
+                                        val.toString().isNotEmpty ? val : "nil";
                                   }),
                               SizedBox(
                                 height: si,
@@ -744,7 +739,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 height: 120,
                                 decoration: BoxDecoration(
                                     border:
-                                    Border.all(color: Colors.grey.shade600),
+                                        Border.all(color: Colors.grey.shade600),
                                     borderRadius: BorderRadius.circular(20)),
                                 padding: const EdgeInsets.only(left: 10),
                                 child: Padding(
@@ -755,9 +750,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                       color: Colors.white,
                                     ),
                                     decoration: InputDecoration(
-                                      hintText: "address",
-                                      hintStyle:
-                                      const TextStyle(color: Colors.grey),
+                                      labelText: "Home Address",
+                                      labelStyle:
+                                          const TextStyle(color: Colors.grey),
                                       border: InputBorder.none,
                                       focusedBorder: InputBorder.none,
                                       enabledBorder: InputBorder.none,
@@ -768,7 +763,10 @@ class _ProfilePageState extends State<ProfilePage> {
                                     maxLines: null,
                                     // Allow text to wrap to the next line
                                     onChanged: (val) {
-                                      userData?.address = val ?? "";
+                                      userData?.address =
+                                          val.toString().isNotEmpty
+                                              ? val
+                                              : "nil";
                                     },
                                   ),
                                 ),
@@ -780,7 +778,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 height: 120,
                                 decoration: BoxDecoration(
                                     border:
-                                    Border.all(color: Colors.grey.shade600),
+                                        Border.all(color: Colors.grey.shade600),
                                     borderRadius: BorderRadius.circular(20)),
                                 padding: const EdgeInsets.only(left: 10),
                                 child: TextField(
@@ -789,8 +787,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                     color: Colors.white,
                                   ),
                                   decoration: const InputDecoration(
-                                    hintText: "Office address",
-                                    hintStyle: TextStyle(color: Colors.grey),
+                                    labelText: "Office Address",
+                                    labelStyle: TextStyle(color: Colors.grey),
                                     border: InputBorder.none,
                                     focusedBorder: InputBorder.none,
                                     enabledBorder: InputBorder.none,
@@ -801,75 +799,68 @@ class _ProfilePageState extends State<ProfilePage> {
                                   maxLines: null,
                                   // Allow text to wrap to the next line
                                   onChanged: (val) {
-                                    userData?.officeAddress = val ?? "";
+                                    userData?.officeAddress =
+                                        val.toString().isNotEmpty ? val : "nil";
                                   },
                                 ),
                               ),
                               TextFieldOne(
+                                  inputLimit: [
+                                    LengthLimitingTextInputFormatter(10),
+                                  ],
                                   readonly: false,
                                   controller: _carNumber1,
-                                  hinttext: "car 1",
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Field is required';
-                                    }
-                                    // Define the regex pattern
-                                    final RegExp regex = RegExp(r'^KL\d{2}[A-Za-z]{2}\d{4}$');
-                                    if (!regex.hasMatch(value)) {
-                                      return 'Invalid format. Format should be KL04An5104';
-                                    }
-                                    return null; // Return null if the input is valid
-                                  },
+                                  hinttext: "KL04AA0000",
+                                  labeltext: "Car Number 1",
                                   onchange: (val) {
-                                    userData?.carNumber1 = val ?? "";
+                                    userData?.carNumber1 =
+                                        val.toString().isNotEmpty ? val : "nil";
                                   }),
                               TextFieldOne(
+                                  inputLimit: [
+                                    LengthLimitingTextInputFormatter(10),
+                                  ],
                                   readonly: false,
                                   controller: _carNumber2,
-                                  hinttext: "Car 2",
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Field is required';
-                                    }
-                                    // Define the regex pattern
-                                    final RegExp regex = RegExp(r'^KL\d{2}[A-Za-z]{2}\d{4}$');
-                                    if (!regex.hasMatch(value)) {
-                                      return 'Invalid format. Format should be KL04An5104';
-                                    }
-                                    return null; // Return null if the input is valid
-                                  },
+                                  hinttext: "KL04AA0000",
+                                  labeltext: "Car Number 2",
                                   onchange: (val) {
-                                    userData?.carNumber2 = val ?? "";
+                                    userData?.carNumber2 =
+                                        val.toString().isNotEmpty ? val : "nil";
                                   }),
                               TextFieldOne(
                                   readonly: false,
                                   controller: _clerkname1,
-                                  hinttext: "Clerk 1",
+                                  labeltext: "Clerk 1",
                                   onchange: (val) {
-                                    userData?.clerkName1 = val ?? "";
+                                    userData?.clerkName1 =
+                                        val.toString().isNotEmpty ? val : "nil";
                                   }),
                               TextFieldOne(
                                   readonly: false,
                                   controller: _clerkphone1,
                                   keytype: TextInputType.phone,
-                                  hinttext: "Clerk 1 Phone",
+                                  labeltext: "Clerk 1 Phone",
                                   onchange: (val) {
-                                    userData?.clerkPhone1 = val ?? "";
+                                    userData?.clerkPhone1 =
+                                        val.toString().isNotEmpty ? val : "nil";
                                   }),
                               TextFieldOne(
                                   readonly: false,
                                   controller: _clerkname2,
-                                  hinttext: "Clerk 2",
+                                  labeltext: "Clerk 2",
                                   onchange: (val) {
-                                    userData?.clerkName2 = val ?? "";
+                                    userData?.clerkName2 =
+                                        val.toString().isNotEmpty ? val : "nil";
                                   }),
                               TextFieldOne(
                                   readonly: false,
                                   controller: _clerkphone2,
                                   keytype: TextInputType.phone,
-                                  hinttext: "Clerk 2 phone",
+                                  labeltext: "Clerk 2 Phone",
                                   onchange: (val) {
-                                    userData?.clerkPhone2 = val ?? "";
+                                    userData?.clerkPhone2 =
+                                        val.toString().isNotEmpty ? val : "nil";
                                   }),
                               // TextFieldOne(
                               //     controller: _district,
@@ -879,29 +870,33 @@ class _ProfilePageState extends State<ProfilePage> {
                                   readonly: false,
                                   controller: _pincode,
                                   keytype: TextInputType.number,
-                                  hinttext: "pincode",
+                                  labeltext: "Pin Code",
                                   onchange: (val) {
-                                    userData?.pincode = val ?? "";
+                                    userData?.pincode =
+                                        val.toString().isNotEmpty ? val : "nil";
                                   }),
                               SizedBox(
                                 height: si,
                               ),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Container(
                                     decoration: BoxDecoration(
                                         border: Border.all(
                                             color: Colors.grey.shade600),
-                                        borderRadius: BorderRadius.circular(18)),
+                                        borderRadius:
+                                            BorderRadius.circular(18)),
                                     child: Padding(
-                                      padding:
-                                      const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                      padding: const EdgeInsets.fromLTRB(
+                                          10, 0, 10, 0),
                                       child: DropdownButton<String>(
                                         hint: Text(
                                           bloodGroup,
                                           style: TextStyle(
-                                              color: Colors.grey.withOpacity(.8)),
+                                              color:
+                                                  Colors.grey.withOpacity(.8)),
                                         ),
                                         underline: Container(),
                                         alignment: Alignment.center,
@@ -909,7 +904,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                         onChanged: (newValue) {
                                           setState(() {
                                             selectedValue = newValue!;
-                                            userData?.bloodGroup = selectedValue;
+                                            userData?.bloodGroup =
+                                                selectedValue;
                                           });
                                         },
                                         items: <String>[
@@ -923,16 +919,16 @@ class _ProfilePageState extends State<ProfilePage> {
                                           'O-',
                                           "N/A",
                                         ].map<DropdownMenuItem<String>>(
-                                                (String value) {
-                                              return DropdownMenuItem<String>(
-                                                value: value,
-                                                child: Text(
-                                                  value,
-                                                  style:
+                                            (String value) {
+                                          return DropdownMenuItem<String>(
+                                            value: value,
+                                            child: Text(
+                                              value,
+                                              style:
                                                   TextStyle(color: Colors.grey),
-                                                ),
-                                              );
-                                            }).toList(),
+                                            ),
+                                          );
+                                        }).toList(),
                                       ),
                                     ),
                                   ),
@@ -940,7 +936,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     width: si,
                                   ),
                                   Text(
-                                    "welfare \nmember",
+                                    "Welfare \nMember",
                                     style: TextStyle(
                                       fontWeight: FontWeight.w500,
                                       fontFamily: "RobotFont",
@@ -955,14 +951,12 @@ class _ProfilePageState extends State<ProfilePage> {
                                           _welfare = true;
                                           userData?.welfareMember = "yes";
                                           welfareData = "yes";
-                                          setState(() {
-                                          });
+                                          setState(() {});
                                         } else if (_welfare == false) {
                                           _welfare = false;
                                           userData?.welfareMember = "no";
                                           welfareData = "no";
-                                          setState(() {
-                                          });
+                                          setState(() {});
                                         }
                                         // setState(() {});
                                       })
@@ -971,16 +965,19 @@ class _ProfilePageState extends State<ProfilePage> {
                               TextFieldOne(
                                   readonly: false,
                                   controller: _district,
-                                  hinttext: "district",
+                                  labeltext: "District",
                                   onchange: (val) {
-                                    userData?.district = val ?? "";
+                                    userData?.district =
+                                        val.toString().isNotEmpty ? val : "nil";
+                                    ;
                                   }),
                               TextFieldOne(
                                   readonly: false,
                                   controller: _state,
-                                  hinttext: "state",
+                                  labeltext: "State",
                                   onchange: (val) {
-                                    userData?.state = val ?? "";
+                                    userData?.state =
+                                        val.toString().isNotEmpty ? val : "nil";
                                   }),
 
                               SizedBox(
@@ -991,17 +988,22 @@ class _ProfilePageState extends State<ProfilePage> {
                                 height: 60,
                                 child: ElevatedButton(
                                     onPressed: () async {
-                                      if(_validateDetail.currentState!.validate()){
-                                        final SharedPreferences prefs = await SharedPreferences.getInstance();
+                                      if (_validateDetail.currentState!
+                                          .validate()) {
+                                        final SharedPreferences prefs =
+                                            await SharedPreferences
+                                                .getInstance();
                                         var regNo = prefs.getString("regNo");
                                         await addData();
-                                        if(regNo != null){
-                                          await context.read<UserDataProvider>().fetchUserData();
+                                        if (regNo != null) {
+                                          await context
+                                              .read<UserDataProvider>()
+                                              .fetchUserData();
                                         }
                                       }
                                     },
                                     child: Text(
-                                      "save",
+                                      "Save",
                                       style: TextStyle(color: Colors.black),
                                     )),
                               ),

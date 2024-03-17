@@ -132,7 +132,7 @@ class _LoginState extends State<Login> {
               ),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
-                  child: Text("${name?? ""}",style: TextStyle(color: Colors.white),overflow:TextOverflow.ellipsis,)),
+                  child: Text("${name}",style: TextStyle(color: Colors.white),overflow:TextOverflow.ellipsis,)),
               SizedBox(height: 10,),
               Padding(
                 padding: const EdgeInsets.only(left: 20, right: 20),
@@ -142,7 +142,7 @@ class _LoginState extends State<Login> {
                       key: _userIdFormKey,
                       child: TextFieldOne(
                         readonly: false,
-                        hinttext: "Roll No",
+                        labeltext: rollNumber,
                         controller: userid,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -157,7 +157,7 @@ class _LoginState extends State<Login> {
                           return null; // Return null if the input is valid
                         },
                         onchange: (value) {
-                          if(userid.text.length > 7){
+                          if(userid.text.length > 6){
                             fetchName(userid.text);
                           }
                           _userIdFormKey.currentState!.validate();
@@ -183,7 +183,7 @@ class _LoginState extends State<Login> {
                           return null; // Return null if the input is valid
                         },
                         readonly: false,
-                        hinttext: "Password",
+                        labeltext: "Password",
                         controller: password,
                         onchange: (value) {
                           _passwordFormKey.currentState!.validate();
@@ -193,8 +193,7 @@ class _LoginState extends State<Login> {
                         sufix: IconButton(
                           icon: Icon(
                               _obscureText
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
+                                  ? Icons.visibility_off:Icons.visibility,
                               color: Colors.grey),
                           onPressed: () {
                             setState(() {

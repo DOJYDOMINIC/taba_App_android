@@ -1,31 +1,34 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:http/http.dart' as http;
 import 'package:taba_app_android/constants/constants.dart';
 
 import 'bottom_nav_bar.dart';
-import 'dir_page.dart';
 
 class Member {
   final String? name;
   final String? position;
   final String? image;
+  final String? phone;
 
   Member({
     this.name,
     this.position,
     this.image,
+    this.phone,
   });
 }
 
-class AboutPage extends StatefulWidget {
-  AboutPage({Key? key}) : super(key: key);
+class Committee extends StatefulWidget {
+  const Committee({super.key});
 
   @override
-  State<AboutPage> createState() => _AboutPageState();
+  State<Committee> createState() => _CommitteeState();
 }
 
-class _AboutPageState extends State<AboutPage> {
+class _CommitteeState extends State<Committee> {
   List<Member> executiveMembers = [];
 
   @override
@@ -55,27 +58,30 @@ class _AboutPageState extends State<AboutPage> {
       name: data != null ? data![0]["name"] : null,
       position: data != null ? data![0]["description"] : null,
       image: data != null ? data![0]["image"] : null,
+      phone: data != null ? data![0]["phone"] : null,
     );
 
     final Member secretary = Member(
       name:  data != null ? data![1]["name"] : null,
       position:  data != null ? data![1]["description"] : null,
       image: data != null ? data![1]["image"] : null,
+      phone: data != null ? data![1]["phone"] : null,
     );
 
     final Member librarian = Member(
       name: data != null ? data![2]["name"] : null,
       position: data != null ? data![2]["description"] : null,
       image: data != null ? data![2]["image"] : null,
+      phone: data != null ? data![2]["phone"] : null,
     );
 
     final List<Member> executiveMembers = [
-      Member(name: data != null ? data![3]["name"]: null, position: data != null ? data![3]["description"] : null, image: data != null ? data![3]["image"] : null,),
-      Member(name:data != null ? data![4]["name"]: null, position: data != null ? data![4]["description"] : null, image: data != null ? data![4]["image"] : null,),
-      Member(name: data != null ? data![5]["name"]: null, position: data != null ? data![5]["description"] : null, image: data != null ? data![5]["image"] : null,),
-      Member(name: data != null ? data![6]["name"]: null, position: data != null ? data![6]["description"] : null, image: data != null ? data![6]["image"] : null,),
-      Member(name: data != null ? data![7]["name"]: null, position: data != null ? data![7]["description"] : null, image: data != null ? data![7]["image"] : null,),
-      Member(name: data != null ? data![8]["name"]: null, position: data != null ? data![8]["description"] : null, image: data != null ? data![8]["image"] : null,),
+      Member(name: data != null ? data![3]["name"]: null, position: data != null ? data![3]["description"] : null, image: data != null ? data![3]["image"] : null,phone: data != null ? data![3]["phone"] : null),
+      Member(name:data != null ? data![4]["name"]: null, position: data != null ? data![4]["description"] : null, image: data != null ? data![4]["image"] : null,phone: data != null ? data![4]["phone"] : null),
+      Member(name: data != null ? data![5]["name"]: null, position: data != null ? data![5]["description"] : null, image: data != null ? data![5]["image"] : null,phone: data != null ? data![5]["phone"] : null),
+      Member(name: data != null ? data![6]["name"]: null, position: data != null ? data![6]["description"] : null, image: data != null ? data![6]["image"] : null,phone: data != null ? data![6]["phone"] : null),
+      Member(name: data != null ? data![7]["name"]: null, position: data != null ? data![7]["description"] : null, image: data != null ? data![7]["image"] : null,phone: data != null ? data![7]["phone"] : null),
+      Member(name: data != null ? data![8]["name"]: null, position: data != null ? data![8]["description"] : null, image: data != null ? data![8]["image"] : null,phone: data != null ? data![8]["phone"] : null),
     ];
 
     return Scaffold(
@@ -159,16 +165,29 @@ class _AboutPageState extends State<AboutPage> {
         ),
        const SizedBox(height: 5),
         SizedBox(
-          width: 100,
-          child: Center(
-            child: Text(
-              member.position ?? '',
-              style: TextStyle(fontSize: 12,color: Colors.white),textAlign: TextAlign.center,
-            ),
+          width: 200.sp,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Center(
+                child: Text(
+                  member.position ?? '',
+                  style: TextStyle(fontSize: 12,color: Colors.white),textAlign: TextAlign.center,
+                ),
+              ),
+              IconButton(onPressed: (){
+                _callNumber(member.phone.toString());
+              }, icon: Icon(Icons.call,color: Colors.white,))
+            ],
           ),
         ),
         Divider()
       ],
     );
+  }
+  void _callNumber(String number) async {
+    if(number.length > 9){
+      await FlutterPhoneDirectCaller.callNumber(number);
+    }
   }
 }

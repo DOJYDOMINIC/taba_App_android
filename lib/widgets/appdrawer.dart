@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taba_app_android/controller/controllers.dart';
 import '../view/aboutpage.dart';
+import '../view/aboutus.dart';
 import '../view/bottom_nav_bar.dart';
 import '../view/login.dart';
 import '../view/passwordreset.dart';
@@ -56,11 +57,25 @@ class _AppDrawerState extends State<AppDrawer> {
                   Navigator.pop(context);
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => AboutPage()),
+                    MaterialPageRoute(builder: (context) => Committee()),
                   );
                 },
                 leading: Icon(
-                  Icons.info_outline,
+                  Icons.supervised_user_circle_outlined,
+                  color: Colors.white,
+                ),
+              ),
+              ListTile(
+                title: Text('About Us', style: TextStyle(color: Colors.white)),
+                onTap: () {
+                  Provider.of<MyPhoneDirectoryProvider>(context,listen: false).isSearching = false;
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => DetailsPage()),
+                  );
+                },
+                leading: Icon(
+                  Icons.info,
                   color: Colors.white,
                 ),
               ),
@@ -82,9 +97,10 @@ class _AppDrawerState extends State<AppDrawer> {
                 title: Text('Logout', style: TextStyle(color: Colors.white)),
                 onTap: () async {
                   final SharedPreferences prefs = await SharedPreferences.getInstance();
-                  prefs.remove("regNo");
+                  // prefs.remove("regNo");
+                  prefs.clear();
                   // Handle logout logic
-                  Navigator.pop(context);
+                  // Navigator.pop(context);
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (context) => Login()),

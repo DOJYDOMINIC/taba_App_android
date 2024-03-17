@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 const Color appcolor = Color.fromRGBO(125, 125, 125, 100);
 
 
 class TextFieldOne extends StatefulWidget {
   const TextFieldOne({
     Key? key,
-    required this.hinttext,
+    required this.labeltext,
     required this.controller,
     required this.onchange,
     this.obsecuretxt,
@@ -14,10 +15,14 @@ class TextFieldOne extends StatefulWidget {
     this.fillcolor,
     this.ontap,
     this.sufix,
+    this.hinttext,
+    this.inputLimit,
+
     this.validator, required this.readonly,
   }) : super(key: key);
 
-  final String hinttext;
+  final String labeltext;
+  final String? hinttext;
   final bool readonly;
   final TextEditingController controller;
   final ValueChanged onchange;
@@ -28,7 +33,7 @@ class TextFieldOne extends StatefulWidget {
   final TextInputType? keytype;
   final Color? fillcolor;
   final String? Function(String?)? validator;
-
+final List<TextInputFormatter>? inputLimit;
   @override
   State<TextFieldOne> createState() => _TextFieldOneState();
 }
@@ -42,6 +47,7 @@ class _TextFieldOneState extends State<TextFieldOne> {
       ),
       child: Container(
         child: TextFormField(
+          inputFormatters: widget.inputLimit,
           readOnly:widget.readonly,
           keyboardType: widget.keytype,
           decoration: InputDecoration(
@@ -56,7 +62,12 @@ class _TextFieldOneState extends State<TextFieldOne> {
               borderSide: const BorderSide(
                   width: 2, color: appcolor), // Border color when not in focus
             ),
-            labelText: widget.hinttext,
+            hintText: widget.hinttext,
+            labelText: widget.labeltext,
+            hintStyle: TextStyle(
+              fontFamily: "RobotFont",
+              color: Colors.grey.withOpacity(.8),
+            ),
             labelStyle: TextStyle(
               fontFamily: "RobotFont",
               color: Colors.grey.withOpacity(.8),

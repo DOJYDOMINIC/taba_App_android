@@ -91,7 +91,7 @@ class _MyAppState extends State<MyApp> {
               appBarTheme: const AppBarTheme(backgroundColor: Colors.black),
 
             ),
-            // home: BottomNavigationPage(),
+            // home: DetailsPage(),
             home: userValid != "true" || widget.regNo == null|| widget.regNo == "" ? Login() :BottomNavigationPage(),
           ),
         ),
@@ -100,15 +100,3 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-class MyAppLifecycleObserver extends WidgetsBindingObserver {
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-    if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.detached) {
-      // Code to execute before the app exits
-      box.clear();
-      print("Hive box cleared");
-    }
-  }
-}

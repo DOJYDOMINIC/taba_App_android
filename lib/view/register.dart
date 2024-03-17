@@ -43,11 +43,11 @@ class _RegistrationState extends State<Registration> {
 
   fetchData() async {
     try {
-      Map<String, dynamic> result = box.get(0);
-      userData = User.fromJson(result);
-      print(userData?.firstName);
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.clear();
+     box.clear();
     } catch (error) {
-      debugPrint("Hive: $error");
+      debugPrint("Error: $error");
     }
   }
 
@@ -110,7 +110,7 @@ class _RegistrationState extends State<Registration> {
                   child: Column(
                     children: [
                       TextFieldOne(
-                        hinttext: "Reg No",
+                        labeltext: rollNumber,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Reg ID is required';
@@ -156,7 +156,7 @@ class _RegistrationState extends State<Registration> {
                             setState(() {});
                           }
                         },
-                        hinttext: "Enrollment date",
+                        labeltext: "Enrollment Date",
                         keytype: TextInputType.number,
                         controller: enrolldatecontroller,
                         onchange: (value) {
@@ -190,7 +190,7 @@ class _RegistrationState extends State<Registration> {
                         readonly: true,
                       ),
                       TextFieldOne(
-                        hinttext: "Password",
+                        labeltext: "Password",
                         controller: password,
                         onchange: (value) {
                           setState(() {
@@ -210,8 +210,7 @@ class _RegistrationState extends State<Registration> {
                         sufix: IconButton(
                           icon: Icon(
                             _obscurepassword
-                                ? Icons.visibility
-                                : Icons.visibility_off,
+                                ? Icons.visibility_off :Icons.visibility,
                             color: Colors.grey,
                           ),
                           onPressed: () {
@@ -223,7 +222,7 @@ class _RegistrationState extends State<Registration> {
                         readonly: false,
                       ),
                       TextFieldOne(
-                        hinttext: "Confirm Password",
+                        labeltext: "Confirm Password",
                         readonly: false,
                         controller: confirmpassword,
                         validator: (value) {
@@ -244,8 +243,7 @@ class _RegistrationState extends State<Registration> {
                         sufix: IconButton(
                           icon: Icon(
                             _obscureconfirmpassword
-                                ? Icons.visibility
-                                : Icons.visibility_off,
+                                ? Icons.visibility_off :Icons.visibility,
                             color: Colors.grey,
                           ),
                           onPressed: () {
@@ -275,12 +273,12 @@ class _RegistrationState extends State<Registration> {
                           ),
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
-                              final SharedPreferences prefs =
-                              await SharedPreferences.getInstance();
-                              var regNo = prefs.getString("regNo");
+                              final SharedPreferences prefs = await SharedPreferences.getInstance();
                               prefs.clear();
+                              var regNo = prefs.getString("regNo");
                               if (regNo == null) {
                                 box.clear();
+
                               }
                               Map<String, dynamic> collectedData = {
                                 "regNo": _regNo,

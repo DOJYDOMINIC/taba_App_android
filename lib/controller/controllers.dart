@@ -11,7 +11,6 @@ import '../model/userslist_model.dart';
 
 class ControllerData extends ChangeNotifier {
 
-
   Map<String,dynamic> _loginResponse = {};
   List<UserList> _usersList = [];
   String _image ="";
@@ -89,7 +88,6 @@ class ControllerData extends ChangeNotifier {
     _usersList.addAll(newList);
     notifyListeners();
   }
-
 }
 
 
@@ -193,11 +191,10 @@ class MyPhoneDirectoryProvider extends ChangeNotifier {
   void clearSearch() {
     isSearching = false;
     filteredContacts.clear(); // Clear search results
-    currentPage = 0; // Reset page count
+    // currentPage = 0; // Reset page count
     reachedEnd = false; // Reset pagination flag
     fetchData(); // Fetch full data
   }
-
 }
 
 

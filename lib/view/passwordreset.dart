@@ -20,8 +20,8 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
   TextEditingController confirmPasswordController = TextEditingController();
 
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  bool _passwordVisibility = false;
-  bool _confirmpasswordVisibility = false;
+  bool _passwordVisibility = true;
+  bool _confirmpasswordVisibility = true;
 
   @override
   Widget build(BuildContext context) {
@@ -115,7 +115,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                     style: TextStyle(color: Colors.white),
                     controller: regNo,
                     decoration: InputDecoration(
-                      labelText: 'Register Number',
+                      labelText: rollNumber,
                       labelStyle: TextStyle(color: Colors.white),
                     ),
                     validator: (value) {
@@ -136,6 +136,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                     style: TextStyle(color: Colors.white),
                     controller: newPasswordController,
                     obscureText: _passwordVisibility,
+                    obscuringCharacter: "*",
                     decoration: InputDecoration(
                       suffixIcon: IconButton(
                         onPressed: () {
@@ -164,6 +165,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                     style: TextStyle(color: Colors.white),
                     controller: confirmPasswordController,
                     obscureText: _confirmpasswordVisibility,
+                    obscuringCharacter: "*",
                     decoration: InputDecoration(
                       suffixIcon: IconButton(
                         onPressed: () {
