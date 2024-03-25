@@ -308,27 +308,18 @@ class _ProfilePageState extends State<ProfilePage> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text("Failed to update"),
-          backgroundColor: Colors.green,
+          backgroundColor: Colors.red,
         ));
       }
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text("Failed to update"),
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.red,
       ));
       print('Error sending request: $error');
     }
   }
 
-  // Future<File> createTemporaryFileFromAsset(String assetPath) async {
-  //   final ByteData data = await rootBundle.load(assetPath);
-  //   final List<int> bytes = data.buffer.asUint8List();
-  //   final String tempFileName =
-  //       DateTime.now().millisecondsSinceEpoch.toString();
-  //   final File tempFile = File('${Directory.systemTemp.path}/$tempFileName');
-  //   await tempFile.writeAsBytes(bytes, flush: true);
-  //   return tempFile;
-  // }
 
   Future<File> _compressImage(File image) async {
     // Read the image file as bytes

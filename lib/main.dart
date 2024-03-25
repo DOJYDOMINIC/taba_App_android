@@ -14,8 +14,8 @@ import 'controller/controllers.dart';
 
 main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  await FirebaseApi().initNotifications();
+  await Firebase.initializeApp(options: FirebaseOptions(apiKey: "AIzaSyBMuHSssNiLju5guxb7tgSZxIT8rhGjx_o", appId: "1:154736769246:web:fb38aca79258fa98d4aa4f", messagingSenderId: "154736769246", projectId: "taba-7597c"));
+  // await FirebaseApi().initNotifications();
   await Hive.initFlutter(); // Initialize Hive
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   var data = prefs.get("regNo");
@@ -41,6 +41,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   var userValid = "true";
+
   Future<void> validateUser() async {
     try {
       final response = await http.post(
@@ -64,7 +65,11 @@ class _MyAppState extends State<MyApp> {
         prefs.clear();
         box.clear();
         userValid == "false";
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Login(),));
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Login(),
+            ));
         setState(() {});
       }
     } catch (e) {
@@ -89,14 +94,16 @@ class _MyAppState extends State<MyApp> {
               fontFamily: 'RobotFont',
               // textTheme: GoogleFonts.montserratTextTheme(Theme.of(context).textTheme,),
               appBarTheme: const AppBarTheme(backgroundColor: Colors.black),
-
             ),
             // home: DetailsPage(),
-            home: userValid != "true" || widget.regNo == null|| widget.regNo == "" ? Login() :BottomNavigationPage(),
+            home: userValid != "true" ||
+                    widget.regNo == null ||
+                    widget.regNo == ""
+                ? Login()
+                : BottomNavigationPage(),
           ),
         ),
       ),
     );
   }
 }
-
