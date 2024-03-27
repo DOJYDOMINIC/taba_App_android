@@ -79,7 +79,6 @@ class _MyPhoneDirectoryState extends State<MyPhoneDirectoryPage> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: TextField(
-
                       controller: _searchData,
                       onChanged: (value){
                         if (value.length <=1) {

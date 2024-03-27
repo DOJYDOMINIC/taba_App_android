@@ -28,9 +28,9 @@ InputDecoration myInputDecoration = InputDecoration(
     borderSide: BorderSide(color: Colors.transparent),
   ),
   enabledBorder: OutlineInputBorder(
-    borderRadius: BorderRadius.circular(10.sp),
+    borderRadius: BorderRadius.circular(10),
     borderSide: BorderSide(
-      width: 2.w,
+      width: 2,
       color: appColor.withOpacity(.3),
     ),
   ),
