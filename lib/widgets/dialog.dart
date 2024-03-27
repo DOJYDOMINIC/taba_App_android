@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../view/passwordreset.dart';
 
-void showPlatformDialog(BuildContext context, String text ) {
+void showPlatformDialog(BuildContext context, String text) {
   if (Platform.isIOS) {
     // iOS dialog
     showCupertinoDialog(
@@ -17,9 +17,13 @@ void showPlatformDialog(BuildContext context, String text ) {
             TextButton(
               child: const Text('OK'),
               onPressed: () {
-                if(text == "Please reset your password to continue"){
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PasswordResetPage(),));
-                }else{
+                if (text == "Please reset your password to continue") {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PasswordResetPage(),
+                      ));
+                } else {
                   Navigator.of(context).pop();
                 }
               },
@@ -40,9 +44,13 @@ void showPlatformDialog(BuildContext context, String text ) {
             TextButton(
               child: const Text('OK'),
               onPressed: () {
-                if(text == "Please reset your password to continue"){
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PasswordResetPage(),));
-                }else{
+                if (text == "Please reset your password to continue") {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PasswordResetPage(),
+                      ));
+                } else {
                   Navigator.of(context).pop();
                 }
               },
@@ -52,6 +60,31 @@ void showPlatformDialog(BuildContext context, String text ) {
       },
     );
   } else {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Alert'),
+          content: Text(text),
+          actions: [
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                if (text == "Please reset your password to continue") {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PasswordResetPage(),
+                      ));
+                } else {
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
     // Unsupported platform
     print('Unsupported platform');
   }
